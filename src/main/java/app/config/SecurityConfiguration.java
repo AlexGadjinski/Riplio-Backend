@@ -1,5 +1,6 @@
 package app.config;
 
+import app.security.CustomAuthenticationEntryPoint;
 import app.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -27,6 +29,8 @@ public class SecurityConfiguration {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .exceptionHandling(exceptions ->
+                        exceptions.authenticationEntryPoint(customAuthenticationEntryPoint))
                 .authorizeHttpRequests(matchers -> matchers
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated()
