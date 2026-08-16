@@ -1,6 +1,8 @@
 package app.common.mapper;
 
 import app.auth.dto.LoginResponse;
+import app.community.dto.CommunityResponse;
+import app.community.model.Community;
 import app.security.jwt.GeneratedToken;
 import app.user.dto.UpdateAvatarResponse;
 import app.user.model.User;
@@ -8,6 +10,21 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class DtoMapper {
+
+    public static CommunityResponse toCommunityResponse(Community community) {
+        User creator = community.getCreator();
+
+        return CommunityResponse.builder()
+                .id(community.getId())
+                .name(community.getName())
+                .description(community.getDescription())
+                .image(community.getImage())
+                .creatorId(creator.getId())
+                .creatorUsername(creator.getUsername())
+                .creatorImage(creator.getProfilePicture())
+                .createdOn(community.getCreatedOn())
+                .build();
+    }
 
     public static LoginResponse toLoginResponse(GeneratedToken generatedToken) {
         return LoginResponse.builder()

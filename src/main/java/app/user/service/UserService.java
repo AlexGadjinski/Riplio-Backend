@@ -31,7 +31,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    private User getById(UUID id) {
+    public User getById(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User with id [%s] does not exist.".formatted(id)));
     }
