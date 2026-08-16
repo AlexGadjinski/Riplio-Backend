@@ -55,7 +55,7 @@ public class AuthService {
 
         GeneratedToken generatedToken = jwtService.generateToken(user);
         return LoginResponse.builder()
-                .token(generatedToken.getToken())
+                .accessToken(generatedToken.getToken())
                 .expiresAt(generatedToken.getExpiresAt())
                 .build();
     }

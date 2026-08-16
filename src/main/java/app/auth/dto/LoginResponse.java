@@ -9,6 +9,6 @@ import java.time.LocalDateTime;
 @Getter
 public class LoginResponse {
 
-    private String token;
+    private String accessToken;
     private LocalDateTime expiresAt;
 }
