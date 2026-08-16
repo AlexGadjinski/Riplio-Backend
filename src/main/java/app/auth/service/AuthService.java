@@ -1,7 +1,6 @@
 package app.auth.service;
 
 import app.auth.dto.LoginRequest;
-import app.auth.dto.LoginResponse;
 import app.auth.dto.RegisterRequest;
 import app.common.exception.ResourceConflictException;
 import app.security.jwt.GeneratedToken;
@@ -47,16 +46,12 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public LoginResponse login(LoginRequest request) {
+    public GeneratedToken login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
 
-        GeneratedToken generatedToken = jwtService.generateToken(user);
-        return LoginResponse.builder()
-                .accessToken(generatedToken.getToken())
-                .expiresAt(generatedToken.getExpiresAt())
-                .build();
+        return jwtService.generateToken(user);
     }
 }

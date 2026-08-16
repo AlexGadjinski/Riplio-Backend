@@ -4,6 +4,8 @@ import app.auth.dto.LoginRequest;
 import app.auth.dto.LoginResponse;
 import app.auth.dto.RegisterRequest;
 import app.auth.service.AuthService;
+import app.common.mapper.DtoMapper;
+import app.security.jwt.GeneratedToken;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,10 +33,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        LoginResponse response = authService.login(request);
+        GeneratedToken generatedToken = authService.login(request);
+        LoginResponse loginResponse = DtoMapper.toLoginResponse(generatedToken);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(response);
+                .body(loginResponse);
     }
 }

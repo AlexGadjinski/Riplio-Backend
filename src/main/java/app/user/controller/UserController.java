@@ -1,5 +1,6 @@
 package app.user.controller;
 
+import app.common.mapper.DtoMapper;
 import app.security.UserPrincipal;
 import app.user.dto.UpdateAvatarResponse;
 import app.user.model.User;
@@ -25,10 +26,10 @@ public class UserController {
     public ResponseEntity<UpdateAvatarResponse> updateAvatar(@AuthenticationPrincipal UserPrincipal principal,
                                                              @RequestParam("file") MultipartFile file) {
         User user = userService.updateAvatar(principal.getUserId(), file);
-        UpdateAvatarResponse updateAvatarResponse = new UpdateAvatarResponse(user.getProfilePicture());
+        UpdateAvatarResponse response = DtoMapper.toUpdateAvatarResponse(user);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(updateAvatarResponse);
+                .body(response);
     }
 }
