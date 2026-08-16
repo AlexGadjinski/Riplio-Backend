@@ -28,6 +28,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Basic
+    private String profilePicture;
+
     @Column(nullable = false)
     private LocalDateTime createdOn;
 
