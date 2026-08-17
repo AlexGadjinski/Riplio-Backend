@@ -80,4 +80,9 @@ public class CommunityService {
         return communityRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Community with id [%s] does not exist.".formatted(id)));
     }
+
+    public Community getByIdWithCreator(UUID id) {
+        return communityRepository.findByIdWithCreator(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Community with id [%s] does not exist.".formatted(id)));
+    }
 }
