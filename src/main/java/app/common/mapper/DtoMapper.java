@@ -1,6 +1,7 @@
 package app.common.mapper;
 
 import app.auth.dto.LoginResponse;
+import app.community.dto.CommunityListItemResponse;
 import app.community.dto.CommunityMembershipResponse;
 import app.community.dto.CommunityResponse;
 import app.community.model.Community;
@@ -24,6 +25,15 @@ public class DtoMapper {
                 .creatorUsername(creator.getUsername())
                 .creatorImage(creator.getProfilePicture())
                 .createdOn(community.getCreatedOn())
+                .build();
+    }
+
+    public static CommunityListItemResponse toCommunityListItemResponse(Community community) {
+        return CommunityListItemResponse.builder()
+                .id(community.getId())
+                .name(community.getName())
+                .description(community.getDescription())
+                .image(community.getImage())
                 .build();
     }
 

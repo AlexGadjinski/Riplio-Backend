@@ -11,6 +11,8 @@ import app.community.repository.CommunityRepository;
 import app.user.model.User;
 import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +55,10 @@ public class CommunityService {
         }
 
         return membershipRepository.save(initializeCommunityMembership(member, community, CommunityRole.MEMBER));
+    }
+
+    public Page<Community> getAll(Pageable pageable) {
+        return communityRepository.findAll(pageable);
     }
 
     private Community initializeCommunity(String name, String description, User creator) {
