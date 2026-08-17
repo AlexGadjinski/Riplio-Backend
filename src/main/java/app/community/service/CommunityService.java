@@ -1,6 +1,7 @@
 package app.community.service;
 
 import app.common.exception.ResourceConflictException;
+import app.common.exception.ResourceNotFoundException;
 import app.community.dto.CreateCommunityRequest;
 import app.community.model.Community;
 import app.community.model.CommunityMembership;
@@ -42,6 +43,18 @@ public class CommunityService {
         return community;
     }
 
+    public CommunityMembership joinCommunity(UUID userId, UUID communityId) {
+        Community community = getById(communityId);
+        User member = userService.getById(userId);
+
+        if (membershipRepository.existsByMemberAndCommunity(member, community)) {
+            throw new ResourceConflictException("User [%s] is already a member of community [%s]."
+                    .formatted(member.getUsername(), community.getName()));
+        }
+
+        return membershipRepository.save(initializeCommunityMembership(member, community, CommunityRole.MEMBER));
+    }
+
     private Community initializeCommunity(String name, String description, User creator) {
         LocalDateTime now = LocalDateTime.now();
 
@@ -61,5 +74,10 @@ public class CommunityService {
                 .role(role)
                 .joinedAt(LocalDateTime.now())
                 .build();
+    }
+
+    public Community getById(UUID id) {
+        return communityRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Community with id [%s] does not exist.".formatted(id)));
     }
 }

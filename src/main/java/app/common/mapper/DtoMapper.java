@@ -1,8 +1,10 @@
 package app.common.mapper;
 
 import app.auth.dto.LoginResponse;
+import app.community.dto.CommunityMembershipResponse;
 import app.community.dto.CommunityResponse;
 import app.community.model.Community;
+import app.community.model.CommunityMembership;
 import app.security.jwt.GeneratedToken;
 import app.user.dto.UpdateAvatarResponse;
 import app.user.model.User;
@@ -23,6 +25,15 @@ public class DtoMapper {
                 .creatorUsername(creator.getUsername())
                 .creatorImage(creator.getProfilePicture())
                 .createdOn(community.getCreatedOn())
+                .build();
+    }
+
+    public static CommunityMembershipResponse toCommunityMembershipResponse(CommunityMembership membership) {
+        return CommunityMembershipResponse.builder()
+                .communityId(membership.getCommunity().getId())
+                .communityName(membership.getCommunity().getName())
+                .role(membership.getRole())
+                .joinedAt(membership.getJoinedAt())
                 .build();
     }
 
