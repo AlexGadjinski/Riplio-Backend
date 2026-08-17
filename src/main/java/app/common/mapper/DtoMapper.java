@@ -21,7 +21,6 @@ public class DtoMapper {
                 .name(community.getName())
                 .description(community.getDescription())
                 .image(community.getImage())
-                .creatorId(creator.getId())
                 .creatorUsername(creator.getUsername())
                 .creatorImage(creator.getProfilePicture())
                 .createdOn(community.getCreatedOn())
