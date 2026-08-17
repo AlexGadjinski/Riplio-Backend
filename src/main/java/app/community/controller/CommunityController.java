@@ -45,4 +45,14 @@ public class CommunityController {
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CommunityResponse> getCommunityById(@PathVariable UUID id) {
+        Community community = communityService.getByIdWithCreator(id);
+        CommunityResponse response = DtoMapper.toCommunityResponse(community);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
 }
