@@ -1,8 +1,9 @@
 package app.community.service;
 
+import app.common.exception.ForbiddenOperationException;
 import app.common.exception.ResourceConflictException;
 import app.common.exception.ResourceNotFoundException;
-import app.community.dto.CreateCommunityRequest;
+import app.community.dto.UpsertCommunityRequest;
 import app.community.model.Community;
 import app.community.model.CommunityMembership;
 import app.community.model.CommunityRole;
@@ -28,7 +29,7 @@ public class CommunityService {
     private final UserService userService;
 
     @Transactional
-    public Community createCommunity(UUID creatorId, CreateCommunityRequest request) {
+    public Community createCommunity(UUID creatorId, UpsertCommunityRequest request) {
 
         if (communityRepository.existsByName(request.getName())) {
             throw new ResourceConflictException("Community with name [%s] already exists.".formatted(request.getName()));
@@ -43,6 +44,25 @@ public class CommunityService {
         membershipRepository.save(membership);
 
         return community;
+    }
+
+    @Transactional
+    public Community updateCommunityInfo(UUID communityId, UUID userId, UpsertCommunityRequest request) {
+        Community community = getById(communityId);
+
+        if (!community.getCreator().getId().equals(userId)) {
+            throw new ForbiddenOperationException("Only the community owner can update its info.");
+        }
+
+        String newName = request.getName();
+        if (!community.getName().equals(newName) && communityRepository.existsByName(newName)) {
+            throw new ResourceConflictException("Community with name [%s] already exists.".formatted(newName));
+        }
+
+        community.setName(newName);
+        community.setDescription(request.getDescription());
+        community.setUpdatedOn(LocalDateTime.now());
+        return communityRepository.save(community);
     }
 
     public CommunityMembership joinCommunity(UUID userId, UUID communityId) {

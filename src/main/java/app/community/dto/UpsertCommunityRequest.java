@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
-public class CreateCommunityRequest {
+public class UpsertCommunityRequest {
 
     @NotBlank(message = "Name is required")
     @Size(min = 6, max = 30, message = "Name must be between 6 and 30 characters")

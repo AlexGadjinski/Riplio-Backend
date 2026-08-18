@@ -29,12 +29,24 @@ public class CommunityController {
 
     @PostMapping
     public ResponseEntity<CommunityResponse> createCommunity(@AuthenticationPrincipal UserPrincipal principal,
-                                                             @Valid @RequestBody CreateCommunityRequest request) {
+                                                             @Valid @RequestBody UpsertCommunityRequest request) {
         Community community = communityService.createCommunity(principal.getUserId(), request);
         CommunityResponse response = DtoMapper.toCommunityResponse(community);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CommunityResponse> updateCommunityInfo(@AuthenticationPrincipal UserPrincipal principal,
+                                                                 @PathVariable UUID id,
+                                                                 @Valid @RequestBody UpsertCommunityRequest request) {
+        Community community = communityService.updateCommunityInfo(id, principal.getUserId(), request);
+        CommunityResponse response = DtoMapper.toCommunityResponse(community);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
                 .body(response);
     }
 
