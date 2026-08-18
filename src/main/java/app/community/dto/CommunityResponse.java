@@ -14,7 +14,5 @@ public class CommunityResponse {
     private String name;
     private String description;
     private String image;
-    private String creatorUsername;
-    private String creatorImage;
     private LocalDateTime createdOn;
 }

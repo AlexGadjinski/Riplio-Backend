@@ -9,10 +9,11 @@ import java.util.UUID;
 
 @Builder
 @Getter
-public class CommunityMembershipResponse {
+public class CommunityMemberResponse {
 
-    private UUID communityId;
-    private String communityName;
+    private UUID memberId;
+    private String username;
+    private String userImage;
     private CommunityRole role;
     private LocalDateTime joinedAt;
 }

@@ -2,12 +2,10 @@ package app.community.controller;
 
 import app.common.dto.PagedResponse;
 import app.common.mapper.DtoMapper;
-import app.community.dto.CommunityListItemResponse;
-import app.community.dto.CommunityMembershipResponse;
-import app.community.dto.CommunityResponse;
-import app.community.dto.CreateCommunityRequest;
+import app.community.dto.*;
 import app.community.model.Community;
 import app.community.model.CommunityMembership;
+import app.community.model.CommunityRole;
 import app.community.service.CommunityService;
 import app.security.UserPrincipal;
 import jakarta.validation.Valid;
@@ -41,10 +39,10 @@ public class CommunityController {
     }
 
     @PostMapping("/{id}/members")
-    public ResponseEntity<CommunityMembershipResponse> joinCommunity(@AuthenticationPrincipal UserPrincipal principal,
-                                                                     @PathVariable(name = "id") UUID communityId) {
-        CommunityMembership membership = communityService.joinCommunity(principal.getUserId(), communityId);
-        CommunityMembershipResponse response = DtoMapper.toCommunityMembershipResponse(membership);
+    public ResponseEntity<JoinCommunityResponse> joinCommunity(@AuthenticationPrincipal UserPrincipal principal,
+                                                               @PathVariable UUID id) {
+        CommunityMembership membership = communityService.joinCommunity(principal.getUserId(), id);
+        JoinCommunityResponse response = DtoMapper.toJoinCommunityResponse(membership);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -53,7 +51,7 @@ public class CommunityController {
 
     @GetMapping("/{id}")
     public ResponseEntity<CommunityResponse> getCommunityById(@PathVariable UUID id) {
-        Community community = communityService.getByIdWithCreator(id);
+        Community community = communityService.getById(id);
         CommunityResponse response = DtoMapper.toCommunityResponse(community);
 
         return ResponseEntity
@@ -62,12 +60,27 @@ public class CommunityController {
     }
 
     @GetMapping
-    public ResponseEntity<PagedResponse<CommunityListItemResponse>> getAllCommunities(
+    public ResponseEntity<PagedResponse<CommunityResponse>> getAllCommunities(
             @PageableDefault(size = 20) Pageable pageable) {
 
-        Page<CommunityListItemResponse> communities = communityService.getAll(pageable)
-                .map(DtoMapper::toCommunityListItemResponse);
-        PagedResponse<CommunityListItemResponse> response = PagedResponse.from(communities);
+        Page<CommunityResponse> communities = communityService.getAllCommunities(pageable)
+                .map(DtoMapper::toCommunityResponse);
+        PagedResponse<CommunityResponse> response = PagedResponse.from(communities);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @GetMapping("/{id}/members")
+    public ResponseEntity<PagedResponse<CommunityMemberResponse>> getMembers(
+            @PathVariable(name = "id") UUID communityId,
+            @RequestParam(required = false) CommunityRole role,
+            @PageableDefault(size = 20) Pageable pageable) {
+
+        Page<CommunityMemberResponse> members = communityService.getMembers(communityId, role, pageable)
+                .map(DtoMapper::toCommunityMemberResponse);
+        PagedResponse<CommunityMemberResponse> response = PagedResponse.from(members);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

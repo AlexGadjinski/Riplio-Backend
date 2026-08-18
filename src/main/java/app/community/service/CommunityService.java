@@ -57,10 +57,6 @@ public class CommunityService {
         return membershipRepository.save(initializeCommunityMembership(member, community, CommunityRole.MEMBER));
     }
 
-    public Page<Community> getAll(Pageable pageable) {
-        return communityRepository.findAll(pageable);
-    }
-
     private Community initializeCommunity(String name, String description, User creator) {
         LocalDateTime now = LocalDateTime.now();
 
@@ -87,8 +83,13 @@ public class CommunityService {
                 .orElseThrow(() -> new ResourceNotFoundException("Community with id [%s] does not exist.".formatted(id)));
     }
 
-    public Community getByIdWithCreator(UUID id) {
-        return communityRepository.findByIdWithCreator(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Community with id [%s] does not exist.".formatted(id)));
+    public Page<Community> getAllCommunities(Pageable pageable) {
+        return communityRepository.findAll(pageable);
     }
+
+    public Page<CommunityMembership> getMembers(UUID communityId, CommunityRole role, Pageable pageable) {
+        Community community = getById(communityId);
+        return membershipRepository.findByCommunityAndRoleWithMember(community, role, pageable);
+    }
+
 }

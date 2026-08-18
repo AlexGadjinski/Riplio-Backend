@@ -1,9 +1,7 @@
 package app.common.mapper;
 
 import app.auth.dto.LoginResponse;
-import app.community.dto.CommunityListItemResponse;
-import app.community.dto.CommunityMembershipResponse;
-import app.community.dto.CommunityResponse;
+import app.community.dto.*;
 import app.community.model.Community;
 import app.community.model.CommunityMembership;
 import app.security.jwt.GeneratedToken;
@@ -13,38 +11,6 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class DtoMapper {
-
-    public static CommunityResponse toCommunityResponse(Community community) {
-        User creator = community.getCreator();
-
-        return CommunityResponse.builder()
-                .id(community.getId())
-                .name(community.getName())
-                .description(community.getDescription())
-                .image(community.getImage())
-                .creatorUsername(creator.getUsername())
-                .creatorImage(creator.getProfilePicture())
-                .createdOn(community.getCreatedOn())
-                .build();
-    }
-
-    public static CommunityListItemResponse toCommunityListItemResponse(Community community) {
-        return CommunityListItemResponse.builder()
-                .id(community.getId())
-                .name(community.getName())
-                .description(community.getDescription())
-                .image(community.getImage())
-                .build();
-    }
-
-    public static CommunityMembershipResponse toCommunityMembershipResponse(CommunityMembership membership) {
-        return CommunityMembershipResponse.builder()
-                .communityId(membership.getCommunity().getId())
-                .communityName(membership.getCommunity().getName())
-                .role(membership.getRole())
-                .joinedAt(membership.getJoinedAt())
-                .build();
-    }
 
     public static LoginResponse toLoginResponse(GeneratedToken generatedToken) {
         return LoginResponse.builder()
@@ -56,4 +22,36 @@ public class DtoMapper {
     public static UpdateAvatarResponse toUpdateAvatarResponse(User user) {
         return new UpdateAvatarResponse(user.getProfilePicture());
     }
+
+    public static CommunityResponse toCommunityResponse(Community community) {
+        return CommunityResponse.builder()
+                .id(community.getId())
+                .name(community.getName())
+                .description(community.getDescription())
+                .image(community.getImage())
+                .createdOn(community.getCreatedOn())
+                .build();
+    }
+
+    public static JoinCommunityResponse toJoinCommunityResponse(CommunityMembership membership) {
+        return JoinCommunityResponse.builder()
+                .communityId(membership.getCommunity().getId())
+                .communityName(membership.getCommunity().getName())
+                .role(membership.getRole())
+                .joinedAt(membership.getJoinedAt())
+                .build();
+    }
+
+    public static CommunityMemberResponse toCommunityMemberResponse(CommunityMembership membership) {
+        User member = membership.getMember();
+
+        return CommunityMemberResponse.builder()
+                .memberId(member.getId())
+                .username(member.getUsername())
+                .userImage(member.getProfilePicture())
+                .role(membership.getRole())
+                .joinedAt(membership.getJoinedAt())
+                .build();
+    }
+
 }
