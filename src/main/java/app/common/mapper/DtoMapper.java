@@ -46,6 +46,13 @@ public class DtoMapper {
                 .build();
     }
 
+    public static TransferOwnershipResponse toTransferOwnershipResponse(Community community) {
+        return TransferOwnershipResponse.builder()
+                .communityId(community.getId())
+                .newOwnerUsername(community.getOwner().getUsername())
+                .build();
+    }
+
     public static JoinCommunityResponse toJoinCommunityResponse(CommunityMembership membership) {
         return JoinCommunityResponse.builder()
                 .communityId(membership.getCommunity().getId())

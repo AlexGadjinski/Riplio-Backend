@@ -69,6 +69,18 @@ public class CommunityController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}/owner")
+    public ResponseEntity<TransferOwnershipResponse> transferOwnership(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable UUID id,
+            @Valid @RequestBody TransferOwnershipRequest request) {
+
+        Community community = communityService.transferOwnership(id, principal.getUserId(), request.getNewOwnerId());
+        TransferOwnershipResponse response = DtoMapper.toTransferOwnershipResponse(community);
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/{id}/members")
     public ResponseEntity<JoinCommunityResponse> joinCommunity(@AuthenticationPrincipal UserPrincipal principal,
                                                                @PathVariable UUID id) {

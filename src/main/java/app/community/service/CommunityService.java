@@ -1,5 +1,6 @@
 package app.community.service;
 
+import app.common.exception.BusinessRuleException;
 import app.common.exception.ForbiddenOperationException;
 import app.common.exception.ResourceConflictException;
 import app.common.exception.ResourceNotFoundException;
@@ -97,6 +98,31 @@ public class CommunityService {
 
         community.setBanner(bannerUrl);
         community.setUpdatedOn(LocalDateTime.now());
+        return communityRepository.save(community);
+    }
+
+    public Community transferOwnership(UUID communityId, UUID currentOwnerId, UUID newOwnerId) {
+        Community community = getById(communityId);
+
+        if (!community.getOwner().getId().equals(currentOwnerId)) {
+            throw new ForbiddenOperationException("Only the community owner can transfer ownership.");
+        }
+
+        if (currentOwnerId.equals(newOwnerId)) {
+            throw new ResourceConflictException("You are already the owner of this community.");
+        }
+
+        User newOwner = userService.getById(newOwnerId);
+        CommunityMembership targetMembership = membershipRepository.findByMemberAndCommunity(newOwner, community)
+                .orElseThrow(() -> new BusinessRuleException("The new owner must be a member of this community."));
+
+        if (targetMembership.getRole() != CommunityRole.MODERATOR) {
+            throw new BusinessRuleException("The new owner must be a moderator of this community.");
+        }
+
+        community.setOwner(newOwner);
+        community.setUpdatedOn(LocalDateTime.now());
+
         return communityRepository.save(community);
     }
 
