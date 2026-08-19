@@ -123,7 +123,8 @@ public class CommunityService {
         community.setOwner(newOwner);
         community.setUpdatedOn(LocalDateTime.now());
 
-        return communityRepository.save(community);
+        communityRepository.save(community);
+        return community;
     }
 
     public CommunityMembership joinCommunity(UUID userId, UUID communityId) {
