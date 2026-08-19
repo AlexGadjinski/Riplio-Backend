@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -45,9 +46,17 @@ public class CommunityController {
         Community community = communityService.updateCommunityInfo(id, principal.getUserId(), request);
         CommunityResponse response = DtoMapper.toCommunityResponse(community);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/avatar")
+    public ResponseEntity<UpdateCommunityAvatarResponse> updateAvatar(@AuthenticationPrincipal UserPrincipal principal,
+                                                                      @PathVariable UUID id,
+                                                                      @RequestParam("file") MultipartFile file) {
+        Community community = communityService.updateAvatar(id, principal.getUserId(), file);
+        UpdateCommunityAvatarResponse response = DtoMapper.toUpdateCommunityAvatarResponse(community);
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/members")
@@ -66,9 +75,7 @@ public class CommunityController {
         Community community = communityService.getById(id);
         CommunityResponse response = DtoMapper.toCommunityResponse(community);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
@@ -79,9 +86,7 @@ public class CommunityController {
                 .map(DtoMapper::toCommunityResponse);
         PagedResponse<CommunityResponse> response = PagedResponse.from(communities);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}/members")
@@ -94,8 +99,7 @@ public class CommunityController {
                 .map(DtoMapper::toCommunityMemberResponse);
         PagedResponse<CommunityMemberResponse> response = PagedResponse.from(members);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
+        return ResponseEntity.ok(response);
     }
+
 }

@@ -36,8 +36,6 @@ public class AuthController {
         GeneratedToken generatedToken = authService.login(request);
         LoginResponse loginResponse = DtoMapper.toLoginResponse(generatedToken);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(loginResponse);
+        return ResponseEntity.ok(loginResponse);
     }
 }

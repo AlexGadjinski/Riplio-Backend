@@ -3,6 +3,8 @@ package app.community.service;
 import app.common.exception.ForbiddenOperationException;
 import app.common.exception.ResourceConflictException;
 import app.common.exception.ResourceNotFoundException;
+import app.common.storage.CloudinaryService;
+import app.common.storage.FileValidator;
 import app.community.dto.UpsertCommunityRequest;
 import app.community.model.Community;
 import app.community.model.CommunityMembership;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -26,6 +29,8 @@ public class CommunityService {
 
     private final CommunityRepository communityRepository;
     private final CommunityMembershipRepository membershipRepository;
+    private final FileValidator fileValidator;
+    private final CloudinaryService cloudinaryService;
     private final UserService userService;
 
     @Transactional
@@ -61,6 +66,21 @@ public class CommunityService {
 
         community.setName(newName);
         community.setDescription(request.getDescription());
+        community.setUpdatedOn(LocalDateTime.now());
+        return communityRepository.save(community);
+    }
+
+    public Community updateAvatar(UUID communityId, UUID userId, MultipartFile file) {
+        Community community = getById(communityId);
+
+        if (!community.getOwner().getId().equals(userId)) {
+            throw new ForbiddenOperationException("Only the community owner can update its avatar.");
+        }
+
+        fileValidator.validateImage(file);
+        String avatarUrl = cloudinaryService.upload(file);
+
+        community.setAvatar(avatarUrl);
         community.setUpdatedOn(LocalDateTime.now());
         return communityRepository.save(community);
     }

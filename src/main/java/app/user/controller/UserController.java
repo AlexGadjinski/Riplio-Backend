@@ -28,8 +28,6 @@ public class UserController {
         User user = userService.updateAvatar(principal.getUserId(), file);
         UpdateAvatarResponse response = DtoMapper.toUpdateAvatarResponse(user);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
+        return ResponseEntity.ok(response);
     }
 }

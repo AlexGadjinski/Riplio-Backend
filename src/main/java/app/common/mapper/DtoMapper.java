@@ -34,6 +34,12 @@ public class DtoMapper {
                 .build();
     }
 
+    public static UpdateCommunityAvatarResponse toUpdateCommunityAvatarResponse(Community community) {
+        return UpdateCommunityAvatarResponse.builder()
+                .avatar(community.getAvatar())
+                .build();
+    }
+
     public static JoinCommunityResponse toJoinCommunityResponse(CommunityMembership membership) {
         return JoinCommunityResponse.builder()
                 .communityId(membership.getCommunity().getId())
