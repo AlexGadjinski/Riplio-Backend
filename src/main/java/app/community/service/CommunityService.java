@@ -29,18 +29,18 @@ public class CommunityService {
     private final UserService userService;
 
     @Transactional
-    public Community createCommunity(UUID creatorId, UpsertCommunityRequest request) {
+    public Community createCommunity(UUID ownerId, UpsertCommunityRequest request) {
 
         if (communityRepository.existsByName(request.getName())) {
             throw new ResourceConflictException("Community with name [%s] already exists.".formatted(request.getName()));
         }
 
-        User creator = userService.getById(creatorId);
+        User owner = userService.getById(ownerId);
 
         Community community = communityRepository.save(
-                initializeCommunity(request.getName(), request.getDescription(), creator));
+                initializeCommunity(request.getName(), request.getDescription(), owner));
 
-        CommunityMembership membership = initializeCommunityMembership(creator, community, CommunityRole.MODERATOR);
+        CommunityMembership membership = initializeCommunityMembership(owner, community, CommunityRole.MODERATOR);
         membershipRepository.save(membership);
 
         return community;
@@ -50,7 +50,7 @@ public class CommunityService {
     public Community updateCommunityInfo(UUID communityId, UUID userId, UpsertCommunityRequest request) {
         Community community = getById(communityId);
 
-        if (!community.getCreator().getId().equals(userId)) {
+        if (!community.getOwner().getId().equals(userId)) {
             throw new ForbiddenOperationException("Only the community owner can update its info.");
         }
 
@@ -77,13 +77,13 @@ public class CommunityService {
         return membershipRepository.save(initializeCommunityMembership(member, community, CommunityRole.MEMBER));
     }
 
-    private Community initializeCommunity(String name, String description, User creator) {
+    private Community initializeCommunity(String name, String description, User owner) {
         LocalDateTime now = LocalDateTime.now();
 
         return Community.builder()
                 .name(name)
                 .description(description)
-                .creator(creator)
+                .owner(owner)
                 .createdOn(now)
                 .updatedOn(now)
                 .build();

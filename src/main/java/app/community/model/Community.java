@@ -31,7 +31,7 @@ public class Community {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
-    private User creator;
+    private User owner;
 
     @Column(nullable = false)
     private LocalDateTime createdOn;
