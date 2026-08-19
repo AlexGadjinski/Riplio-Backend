@@ -28,7 +28,8 @@ public class DtoMapper {
                 .id(community.getId())
                 .name(community.getName())
                 .description(community.getDescription())
-                .image(community.getImage())
+                .avatar(community.getAvatar())
+                .banner(community.getBanner())
                 .createdOn(community.getCreatedOn())
                 .build();
     }

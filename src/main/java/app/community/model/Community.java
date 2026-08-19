@@ -27,7 +27,10 @@ public class Community {
     private String description;
 
     @Basic
-    private String image;
+    private String avatar;
+
+    @Basic
+    private String banner;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
