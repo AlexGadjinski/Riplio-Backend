@@ -40,6 +40,12 @@ public class DtoMapper {
                 .build();
     }
 
+    public static UpdateCommunityBannerResponse toUpdateCommunityBannerResponse(Community community) {
+        return UpdateCommunityBannerResponse.builder()
+                .banner(community.getBanner())
+                .build();
+    }
+
     public static JoinCommunityResponse toJoinCommunityResponse(CommunityMembership membership) {
         return JoinCommunityResponse.builder()
                 .communityId(membership.getCommunity().getId())

@@ -85,6 +85,21 @@ public class CommunityService {
         return communityRepository.save(community);
     }
 
+    public Community updateBanner(UUID communityId, UUID userId, MultipartFile file) {
+        Community community = getById(communityId);
+
+        if (!community.getOwner().getId().equals(userId)) {
+            throw new ForbiddenOperationException("Only the community owner can update its banner.");
+        }
+
+        fileValidator.validateImage(file);
+        String bannerUrl = cloudinaryService.upload(file);
+
+        community.setBanner(bannerUrl);
+        community.setUpdatedOn(LocalDateTime.now());
+        return communityRepository.save(community);
+    }
+
     public CommunityMembership joinCommunity(UUID userId, UUID communityId) {
         Community community = getById(communityId);
         User member = userService.getById(userId);

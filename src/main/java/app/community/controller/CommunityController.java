@@ -59,6 +59,16 @@ public class CommunityController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}/banner")
+    public ResponseEntity<UpdateCommunityBannerResponse> updateBanner(@AuthenticationPrincipal UserPrincipal principal,
+                                                                      @PathVariable UUID id,
+                                                                      @RequestParam("file") MultipartFile file) {
+        Community community = communityService.updateBanner(id, principal.getUserId(), file);
+        UpdateCommunityBannerResponse response = DtoMapper.toUpdateCommunityBannerResponse(community);
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/{id}/members")
     public ResponseEntity<JoinCommunityResponse> joinCommunity(@AuthenticationPrincipal UserPrincipal principal,
                                                                @PathVariable UUID id) {
