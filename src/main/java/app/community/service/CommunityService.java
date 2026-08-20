@@ -6,7 +6,7 @@ import app.common.exception.ResourceConflictException;
 import app.common.exception.ResourceNotFoundException;
 import app.common.storage.CloudinaryService;
 import app.common.storage.FileValidator;
-import app.community.dto.BanMemberRequest;
+import app.community.dto.BanRequest;
 import app.community.dto.UpsertCommunityRequest;
 import app.community.model.Community;
 import app.community.model.CommunityBan;
@@ -182,7 +182,7 @@ public class CommunityService {
     }
 
     @Transactional
-    public CommunityBan banMember(UUID communityId, UUID actingUserId, UUID targetUserId, BanMemberRequest request) {
+    public CommunityBan banMember(UUID communityId, UUID actingUserId, UUID targetUserId, BanRequest request) {
         Community community = getById(communityId);
         User targetUser = userService.getById(targetUserId);
 
@@ -274,7 +274,7 @@ public class CommunityService {
                 .build();
     }
 
-    private CommunityBan initializeBan(User bannedMember, Community community, User bannedBy, BanMemberRequest request) {
+    private CommunityBan initializeBan(User bannedMember, Community community, User bannedBy, BanRequest request) {
         return CommunityBan.builder()
                 .bannedMember(bannedMember)
                 .community(community)
@@ -287,6 +287,15 @@ public class CommunityService {
     public Community getById(UUID id) {
         return communityRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Community with id [%s] does not exist.".formatted(id)));
+    }
+
+    public Page<CommunityBan> getBans(UUID communityId, UUID actingUserId, Pageable pageable) {
+        Community community = getById(communityId);
+
+        User actingUser = userService.getById(actingUserId);
+        requireModerator(community, actingUser, "Only the owner or moderators can view banned members.");
+
+        return banRepository.findByCommunityWithBannedMember(community, pageable);
     }
 
     public Page<Community> getAllCommunities(Pageable pageable) {

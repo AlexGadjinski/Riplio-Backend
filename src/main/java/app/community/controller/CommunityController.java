@@ -114,12 +114,12 @@ public class CommunityController {
     }
 
     @PostMapping("/{id}/bans/{userId}")
-    public ResponseEntity<BanMemberResponse> banMember(@AuthenticationPrincipal UserPrincipal principal,
-                                                       @PathVariable(name = "id") UUID communityId,
-                                                       @PathVariable UUID userId,
-                                                       @Valid @RequestBody BanMemberRequest request) {
+    public ResponseEntity<BanResponse> banMember(@AuthenticationPrincipal UserPrincipal principal,
+                                                 @PathVariable(name = "id") UUID communityId,
+                                                 @PathVariable UUID userId,
+                                                 @Valid @RequestBody BanRequest request) {
         CommunityBan communityBan = communityService.banMember(communityId, principal.getUserId(), userId, request);
-        BanMemberResponse response = DtoMapper.toBanMemberResponse(communityBan);
+        BanResponse response = DtoMapper.toBanResponse(communityBan);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -163,6 +163,17 @@ public class CommunityController {
         Page<CommunityMemberResponse> members = communityService.getMembers(communityId, role, pageable)
                 .map(DtoMapper::toCommunityMemberResponse);
         PagedResponse<CommunityMemberResponse> response = PagedResponse.from(members);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/bans")
+    public ResponseEntity<PagedResponse<BannedMemberResponse>> getBans(@AuthenticationPrincipal UserPrincipal principal,
+                                                                       @PathVariable UUID id,
+                                                                       @PageableDefault(size = 20) Pageable pageable) {
+        Page<BannedMemberResponse> bans = communityService.getBans(id, principal.getUserId(), pageable)
+                .map(DtoMapper::toBannedMemberResponse);
+        PagedResponse<BannedMemberResponse> response = PagedResponse.from(bans);
 
         return ResponseEntity.ok(response);
     }

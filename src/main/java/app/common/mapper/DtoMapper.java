@@ -71,10 +71,22 @@ public class DtoMapper {
                 .build();
     }
 
-    public static BanMemberResponse toBanMemberResponse(CommunityBan communityBan) {
-        return BanMemberResponse.builder()
+    public static BanResponse toBanResponse(CommunityBan communityBan) {
+        return BanResponse.builder()
                 .communityId(communityBan.getCommunity().getId())
                 .bannedUsername(communityBan.getBannedMember().getUsername())
+                .bannedOn(communityBan.getBannedOn())
+                .build();
+    }
+
+    public static BannedMemberResponse toBannedMemberResponse(CommunityBan communityBan) {
+        return BannedMemberResponse.builder()
+                .communityId(communityBan.getCommunity().getId())
+                .bannedUsername(communityBan.getBannedMember().getUsername())
+                .bannedAvatarUrl(communityBan.getBannedMember().getProfilePicture())
+                .bannedByUsername(communityBan.getBannedBy().getUsername())
+                .bannedByAvatarUrl(communityBan.getBannedBy().getProfilePicture())
+                .reason(communityBan.getReason())
                 .bannedOn(communityBan.getBannedOn())
                 .build();
     }

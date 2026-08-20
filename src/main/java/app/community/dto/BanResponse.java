@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Builder
 @Getter
-public class BanMemberResponse {
+public class BanResponse {
 
     private UUID communityId;
     private String bannedUsername;
