@@ -50,8 +50,7 @@ public class CommunityService {
         Community community = communityRepository.save(
                 initializeCommunity(request.getName(), request.getDescription(), owner));
 
-        CommunityMembership membership = initializeCommunityMembership(owner, community, CommunityRole.MODERATOR);
-        membershipRepository.save(membership);
+        membershipRepository.save(initializeMembership(owner, community, CommunityRole.MODERATOR));
 
         return community;
     }
@@ -59,10 +58,7 @@ public class CommunityService {
     @Transactional
     public Community updateCommunityInfo(UUID communityId, UUID userId, UpsertCommunityRequest request) {
         Community community = getById(communityId);
-
-        if (!community.getOwner().getId().equals(userId)) {
-            throw new ForbiddenOperationException("Only the community owner can update its info.");
-        }
+        requireOwner(community, userId, "Only the community owner can update its info.");
 
         String newName = request.getName();
         if (!community.getName().equals(newName) && communityRepository.existsByName(newName)) {
@@ -77,10 +73,7 @@ public class CommunityService {
 
     public Community updateAvatar(UUID communityId, UUID userId, MultipartFile file) {
         Community community = getById(communityId);
-
-        if (!community.getOwner().getId().equals(userId)) {
-            throw new ForbiddenOperationException("Only the community owner can update its avatar.");
-        }
+        requireOwner(community, userId, "Only the community owner can update its avatar.");
 
         fileValidator.validateImage(file);
         String avatarUrl = cloudinaryService.upload(file);
@@ -92,10 +85,7 @@ public class CommunityService {
 
     public Community updateBanner(UUID communityId, UUID userId, MultipartFile file) {
         Community community = getById(communityId);
-
-        if (!community.getOwner().getId().equals(userId)) {
-            throw new ForbiddenOperationException("Only the community owner can update its banner.");
-        }
+        requireOwner(community, userId, "Only the community owner can update its banner.");
 
         fileValidator.validateImage(file);
         String bannerUrl = cloudinaryService.upload(file);
@@ -107,10 +97,7 @@ public class CommunityService {
 
     public Community transferOwnership(UUID communityId, UUID currentOwnerId, UUID newOwnerId) {
         Community community = getById(communityId);
-
-        if (!community.getOwner().getId().equals(currentOwnerId)) {
-            throw new ForbiddenOperationException("Only the community owner can transfer ownership.");
-        }
+        requireOwner(community, currentOwnerId, "Only the community owner can transfer ownership.");
 
         if (currentOwnerId.equals(newOwnerId)) {
             throw new ResourceConflictException("You are already the owner of this community.");
@@ -144,36 +131,25 @@ public class CommunityService {
             throw new ForbiddenOperationException("You are banned from this community.");
         }
 
-        return membershipRepository.save(initializeCommunityMembership(member, community, CommunityRole.MEMBER));
+        return membershipRepository.save(initializeMembership(member, community, CommunityRole.MEMBER));
     }
 
     public CommunityMembership updateMember(UUID communityId, UUID actingUserId, UUID targetUserId, CommunityRole newRole) {
         Community community = getById(communityId);
         User targetUser = userService.getById(targetUserId);
 
-        if (targetUserId.equals(community.getOwner().getId())) {
-            throw new BusinessRuleException("The community owner's role cannot be changed. Transfer ownership first.");
-        }
-
-        CommunityMembership targetMembership = membershipRepository.findByMemberAndCommunity(targetUser, community)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "User with id [%s] is not a member of this community.".formatted(targetUserId)));
+        requireNotOwner(community, targetUserId, "The community owner's role cannot be changed. Transfer ownership first.");
+        CommunityMembership targetMembership = requireMembership(community, targetUser);
 
         if (targetMembership.getRole() == newRole) {
             throw new ResourceConflictException("User already has [%s] role.".formatted(newRole));
         }
 
-        boolean actingIsOwner = community.getOwner().getId().equals(actingUserId);
         boolean isPromotion = newRole == CommunityRole.MODERATOR;
-
         if (isPromotion) {
             User actingUser = userService.getById(actingUserId);
-            boolean actingIsModerator = membershipRepository.existsByMemberAndCommunityAndRole(
-                    actingUser, community, CommunityRole.MODERATOR);
-            if (!actingIsModerator) {
-                throw new ForbiddenOperationException("Only the owner or moderators can promote members.");
-            }
-        } else if (!actingIsOwner) {
+            requireModerator(community, actingUser, "Only the owner or moderators can promote members.");
+        } else if (!isOwner(community, actingUserId)) {
             throw new ForbiddenOperationException("Only the owner can demote moderators.");
         }
 
@@ -188,30 +164,18 @@ public class CommunityService {
         Community community = getById(communityId);
         User targetUser = userService.getById(targetUserId);
 
-        if (targetUserId.equals(community.getOwner().getId())) {
-            throw new BusinessRuleException("The community owner cannot be removed. Transfer ownership first.");
-        }
-
-        CommunityMembership targetMembership = membershipRepository.findByMemberAndCommunity(targetUser, community)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "User with id [%s] is not a member of this community.".formatted(targetUserId)));
+        requireNotOwner(community, targetUserId, "The community owner cannot be removed. Transfer ownership first.");
+        CommunityMembership targetMembership = requireMembership(community, targetUser);
 
         boolean isSelfRemoval = actingUserId.equals(targetUserId);
 
         if (!isSelfRemoval) {
-            boolean actingIsOwner = community.getOwner().getId().equals(actingUserId);
-
-            if (!actingIsOwner && targetMembership.getRole() == CommunityRole.MODERATOR) {
+            if (!isOwner(community, actingUserId) && targetMembership.getRole() == CommunityRole.MODERATOR) {
                 throw new ForbiddenOperationException("Only the owner can kick a moderator.");
             }
 
             User actingUser = userService.getById(actingUserId);
-            boolean actingIsModerator = membershipRepository.existsByMemberAndCommunityAndRole(
-                    actingUser, community, CommunityRole.MODERATOR);
-
-            if (!actingIsModerator) {
-                throw new ForbiddenOperationException("Only the owner or moderators can kick members.");
-            }
+            requireModerator(community, actingUser, "Only the owner or moderators can kick members.");
         }
 
         membershipRepository.delete(targetMembership);
@@ -222,57 +186,71 @@ public class CommunityService {
         Community community = getById(communityId);
         User targetUser = userService.getById(targetUserId);
 
-        if (targetUserId.equals(community.getOwner().getId())) {
-            throw new BusinessRuleException("The community owner cannot be banned. Transfer ownership first.");
-        }
+        requireNotOwner(community, targetUserId, "The community owner cannot be banned. Transfer ownership first.");
 
         if (banRepository.existsByBannedMemberAndCommunity(targetUser, community)) {
             throw new ResourceConflictException(
                     "User with id [%s] is already banned from this community.".formatted(targetUserId));
         }
 
-        CommunityMembership targetMembership = membershipRepository.findByMemberAndCommunity(targetUser, community)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "User with id [%s] is not a member of this community.".formatted(targetUserId)));
+        CommunityMembership targetMembership = requireMembership(community, targetUser);
 
-        boolean actingIsOwner = community.getOwner().getId().equals(actingUserId);
-        if (!actingIsOwner && targetMembership.getRole() == CommunityRole.MODERATOR) {
+        if (!isOwner(community, actingUserId) && targetMembership.getRole() == CommunityRole.MODERATOR) {
             throw new ForbiddenOperationException("Only the owner can ban a moderator.");
         }
 
         User actingUser = userService.getById(actingUserId);
-        boolean actingIsModerator = membershipRepository.existsByMemberAndCommunityAndRole(
-                actingUser, community, CommunityRole.MODERATOR);
-
-        if (!actingIsModerator) {
-            throw new ForbiddenOperationException("Only the owner or moderators can ban members.");
-        }
+        requireModerator(community, actingUser, "Only the owner or moderators can ban members.");
 
         membershipRepository.delete(targetMembership);
 
-        return banRepository.save(initializeCommunityBan(targetUser, community, actingUser, request));
+        return banRepository.save(initializeBan(targetUser, community, actingUser, request));
     }
 
     public void unbanMember(UUID communityId, UUID actingUserId, UUID targetUserId) {
         Community community = getById(communityId);
         User targetUser = userService.getById(targetUserId);
 
-        boolean actingIsOwner = community.getOwner().getId().equals(actingUserId);
-
-        if (!actingIsOwner) {
-            User actingUser = userService.getById(actingUserId);
-            boolean actingIsModerator = membershipRepository.existsByMemberAndCommunityAndRole(
-                    actingUser, community, CommunityRole.MODERATOR);
-
-            if (!actingIsModerator) {
-                throw new ForbiddenOperationException("Only the owner or moderators can unban members.");
-            }
-        }
+        User actingUser = userService.getById(actingUserId);
+        requireModerator(community, actingUser, "Only the owner or moderators can unban members.");
 
         CommunityBan ban = banRepository.findByBannedMemberAndCommunity(targetUser, community)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "User with id [%s] is not banned from this community.".formatted(targetUserId)));
+
         banRepository.delete(ban);
+    }
+
+    private void requireOwner(Community community, UUID userId, String message) {
+        if (!isOwner(community, userId)) {
+            throw new ForbiddenOperationException(message);
+        }
+    }
+
+    private void requireModerator(Community community, User user, String message) {
+        if (!isModerator(community, user)) {
+            throw new ForbiddenOperationException(message);
+        }
+    }
+
+    private void requireNotOwner(Community community, UUID userId, String message) {
+        if (userId.equals(community.getOwner().getId())) {
+            throw new BusinessRuleException(message);
+        }
+    }
+
+    private CommunityMembership requireMembership(Community community, User user) {
+        return membershipRepository.findByMemberAndCommunity(user, community)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User with id [%s] is not a member of this community.".formatted(user.getId())));
+    }
+
+    private boolean isOwner(Community community, UUID userId) {
+        return community.getOwner().getId().equals(userId);
+    }
+
+    private boolean isModerator(Community community, User user) {
+        return membershipRepository.existsByMemberAndCommunityAndRole(user, community, CommunityRole.MODERATOR);
     }
 
     private Community initializeCommunity(String name, String description, User owner) {
@@ -287,7 +265,7 @@ public class CommunityService {
                 .build();
     }
 
-    private CommunityMembership initializeCommunityMembership(User member, Community community, CommunityRole role) {
+    private CommunityMembership initializeMembership(User member, Community community, CommunityRole role) {
         return CommunityMembership.builder()
                 .member(member)
                 .community(community)
@@ -296,7 +274,7 @@ public class CommunityService {
                 .build();
     }
 
-    private CommunityBan initializeCommunityBan(User bannedMember, Community community, User bannedBy, BanMemberRequest request) {
+    private CommunityBan initializeBan(User bannedMember, Community community, User bannedBy, BanMemberRequest request) {
         return CommunityBan.builder()
                 .bannedMember(bannedMember)
                 .community(community)
