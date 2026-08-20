@@ -127,9 +127,9 @@ public class CommunityController {
     }
 
     @DeleteMapping("/{id}/bans/{userId}")
-    public ResponseEntity<BanMemberResponse> unbanMember(@AuthenticationPrincipal UserPrincipal principal,
-                                                         @PathVariable(name = "id") UUID communityId,
-                                                         @PathVariable UUID userId) {
+    public ResponseEntity<Void> unbanMember(@AuthenticationPrincipal UserPrincipal principal,
+                                            @PathVariable(name = "id") UUID communityId,
+                                            @PathVariable UUID userId) {
         communityService.unbanMember(communityId, principal.getUserId(), userId);
 
         return ResponseEntity.noContent().build();
