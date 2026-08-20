@@ -4,6 +4,7 @@ import app.common.dto.PagedResponse;
 import app.common.mapper.DtoMapper;
 import app.community.dto.*;
 import app.community.model.Community;
+import app.community.model.CommunityBan;
 import app.community.model.CommunityMembership;
 import app.community.model.CommunityRole;
 import app.community.service.CommunityService;
@@ -109,6 +110,28 @@ public class CommunityController {
                                              @PathVariable(name = "id") UUID communityId,
                                              @PathVariable UUID userId) {
         communityService.removeMember(communityId, principal.getUserId(), userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/bans/{userId}")
+    public ResponseEntity<BanMemberResponse> banMember(@AuthenticationPrincipal UserPrincipal principal,
+                                                       @PathVariable(name = "id") UUID communityId,
+                                                       @PathVariable UUID userId,
+                                                       @Valid @RequestBody BanMemberRequest request) {
+        CommunityBan communityBan = communityService.banMember(communityId, principal.getUserId(), userId, request);
+        BanMemberResponse response = DtoMapper.toBanMemberResponse(communityBan);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @DeleteMapping("/{id}/bans/{userId}")
+    public ResponseEntity<BanMemberResponse> unbanMember(@AuthenticationPrincipal UserPrincipal principal,
+                                                         @PathVariable(name = "id") UUID communityId,
+                                                         @PathVariable UUID userId) {
+        communityService.unbanMember(communityId, principal.getUserId(), userId);
+
         return ResponseEntity.noContent().build();
     }
 

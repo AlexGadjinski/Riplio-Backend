@@ -6,10 +6,13 @@ import app.common.exception.ResourceConflictException;
 import app.common.exception.ResourceNotFoundException;
 import app.common.storage.CloudinaryService;
 import app.common.storage.FileValidator;
+import app.community.dto.BanMemberRequest;
 import app.community.dto.UpsertCommunityRequest;
 import app.community.model.Community;
+import app.community.model.CommunityBan;
 import app.community.model.CommunityMembership;
 import app.community.model.CommunityRole;
+import app.community.repository.CommunityBanRepository;
 import app.community.repository.CommunityMembershipRepository;
 import app.community.repository.CommunityRepository;
 import app.user.model.User;
@@ -30,6 +33,7 @@ public class CommunityService {
 
     private final CommunityRepository communityRepository;
     private final CommunityMembershipRepository membershipRepository;
+    private final CommunityBanRepository banRepository;
     private final FileValidator fileValidator;
     private final CloudinaryService cloudinaryService;
     private final UserService userService;
@@ -136,6 +140,10 @@ public class CommunityService {
                     .formatted(member.getUsername(), community.getName()));
         }
 
+        if (banRepository.existsByBannedMemberAndCommunity(member, community)) {
+            throw new ForbiddenOperationException("You are banned from this community.");
+        }
+
         return membershipRepository.save(initializeCommunityMembership(member, community, CommunityRole.MEMBER));
     }
 
@@ -149,7 +157,7 @@ public class CommunityService {
 
         CommunityMembership targetMembership = membershipRepository.findByMemberAndCommunity(targetUser, community)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "User [%s] is not a member of this community.".formatted(targetUserId)));
+                        "User with id [%s] is not a member of this community.".formatted(targetUserId)));
 
         if (targetMembership.getRole() == newRole) {
             throw new ResourceConflictException("User already has [%s] role.".formatted(newRole));
@@ -186,7 +194,7 @@ public class CommunityService {
 
         CommunityMembership targetMembership = membershipRepository.findByMemberAndCommunity(targetUser, community)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "User [%s] is not a member of this community.".formatted(targetUserId)));
+                        "User with id [%s] is not a member of this community.".formatted(targetUserId)));
 
         boolean isSelfRemoval = actingUserId.equals(targetUserId);
 
@@ -194,7 +202,7 @@ public class CommunityService {
             boolean actingIsOwner = community.getOwner().getId().equals(actingUserId);
 
             if (!actingIsOwner && targetMembership.getRole() == CommunityRole.MODERATOR) {
-                throw new ForbiddenOperationException("Only the owner can remove a moderator.");
+                throw new ForbiddenOperationException("Only the owner can kick a moderator.");
             }
 
             User actingUser = userService.getById(actingUserId);
@@ -202,11 +210,69 @@ public class CommunityService {
                     actingUser, community, CommunityRole.MODERATOR);
 
             if (!actingIsModerator) {
-                throw new ForbiddenOperationException("Only the owner or moderators can remove members.");
+                throw new ForbiddenOperationException("Only the owner or moderators can kick members.");
             }
         }
 
         membershipRepository.delete(targetMembership);
+    }
+
+    @Transactional
+    public CommunityBan banMember(UUID communityId, UUID actingUserId, UUID targetUserId, BanMemberRequest request) {
+        Community community = getById(communityId);
+        User targetUser = userService.getById(targetUserId);
+
+        if (targetUserId.equals(community.getOwner().getId())) {
+            throw new BusinessRuleException("The community owner cannot be banned. Transfer ownership first.");
+        }
+
+        if (banRepository.existsByBannedMemberAndCommunity(targetUser, community)) {
+            throw new ResourceConflictException(
+                    "User with id [%s] is already banned from this community.".formatted(targetUserId));
+        }
+
+        CommunityMembership targetMembership = membershipRepository.findByMemberAndCommunity(targetUser, community)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User with id [%s] is not a member of this community.".formatted(targetUserId)));
+
+        boolean actingIsOwner = community.getOwner().getId().equals(actingUserId);
+        if (!actingIsOwner && targetMembership.getRole() == CommunityRole.MODERATOR) {
+            throw new ForbiddenOperationException("Only the owner can ban a moderator.");
+        }
+
+        User actingUser = userService.getById(actingUserId);
+        boolean actingIsModerator = membershipRepository.existsByMemberAndCommunityAndRole(
+                actingUser, community, CommunityRole.MODERATOR);
+
+        if (!actingIsModerator) {
+            throw new ForbiddenOperationException("Only the owner or moderators can ban members.");
+        }
+
+        membershipRepository.delete(targetMembership);
+
+        return banRepository.save(initializeCommunityBan(targetUser, community, actingUser, request));
+    }
+
+    public void unbanMember(UUID communityId, UUID actingUserId, UUID targetUserId) {
+        Community community = getById(communityId);
+        User targetUser = userService.getById(targetUserId);
+
+        boolean actingIsOwner = community.getOwner().getId().equals(actingUserId);
+
+        if (!actingIsOwner) {
+            User actingUser = userService.getById(actingUserId);
+            boolean actingIsModerator = membershipRepository.existsByMemberAndCommunityAndRole(
+                    actingUser, community, CommunityRole.MODERATOR);
+
+            if (!actingIsModerator) {
+                throw new ForbiddenOperationException("Only the owner or moderators can unban members.");
+            }
+        }
+
+        CommunityBan ban = banRepository.findByBannedMemberAndCommunity(targetUser, community)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User with id [%s] is not banned from this community.".formatted(targetUserId)));
+        banRepository.delete(ban);
     }
 
     private Community initializeCommunity(String name, String description, User owner) {
@@ -227,6 +293,16 @@ public class CommunityService {
                 .community(community)
                 .role(role)
                 .joinedOn(LocalDateTime.now())
+                .build();
+    }
+
+    private CommunityBan initializeCommunityBan(User bannedMember, Community community, User bannedBy, BanMemberRequest request) {
+        return CommunityBan.builder()
+                .bannedMember(bannedMember)
+                .community(community)
+                .bannedBy(bannedBy)
+                .reason(request.getReason())
+                .bannedOn(LocalDateTime.now())
                 .build();
     }
 

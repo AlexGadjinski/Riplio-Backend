@@ -3,6 +3,7 @@ package app.common.mapper;
 import app.auth.dto.LoginResponse;
 import app.community.dto.*;
 import app.community.model.Community;
+import app.community.model.CommunityBan;
 import app.community.model.CommunityMembership;
 import app.security.jwt.GeneratedToken;
 import app.user.dto.UpdateAvatarResponse;
@@ -67,6 +68,14 @@ public class DtoMapper {
                 .memberId(membership.getMember().getId())
                 .username(membership.getMember().getUsername())
                 .role(membership.getRole())
+                .build();
+    }
+
+    public static BanMemberResponse toBanMemberResponse(CommunityBan communityBan) {
+        return BanMemberResponse.builder()
+                .communityId(communityBan.getCommunity().getId())
+                .bannedUsername(communityBan.getBannedMember().getUsername())
+                .bannedOn(communityBan.getBannedOn())
                 .build();
     }
 
