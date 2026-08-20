@@ -32,7 +32,7 @@ public class SecurityConfiguration {
                 .exceptionHandling(exceptions ->
                         exceptions.authenticationEntryPoint(customAuthenticationEntryPoint))
                 .authorizeHttpRequests(matchers -> matchers
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
