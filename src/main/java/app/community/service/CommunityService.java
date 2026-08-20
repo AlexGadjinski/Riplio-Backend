@@ -226,7 +226,7 @@ public class CommunityService {
                 .member(member)
                 .community(community)
                 .role(role)
-                .joinedAt(LocalDateTime.now())
+                .joinedOn(LocalDateTime.now())
                 .build();
     }
 

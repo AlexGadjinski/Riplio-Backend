@@ -33,5 +33,5 @@ public class CommunityMembership {
     private CommunityRole role;
 
     @Column(nullable = false)
-    private LocalDateTime joinedAt;
+    private LocalDateTime joinedOn;
 }

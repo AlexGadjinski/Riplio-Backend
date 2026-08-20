@@ -14,5 +14,5 @@ public class JoinCommunityResponse {
     private UUID communityId;
     private String communityName;
     private CommunityRole role;
-    private LocalDateTime joinedAt;
+    private LocalDateTime joinedOn;
 }

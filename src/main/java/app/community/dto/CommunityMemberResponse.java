@@ -15,5 +15,5 @@ public class CommunityMemberResponse {
     private String username;
     private String userImage;
     private CommunityRole role;
-    private LocalDateTime joinedAt;
+    private LocalDateTime joinedOn;
 }

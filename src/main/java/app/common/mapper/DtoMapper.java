@@ -58,7 +58,7 @@ public class DtoMapper {
                 .communityId(membership.getCommunity().getId())
                 .communityName(membership.getCommunity().getName())
                 .role(membership.getRole())
-                .joinedAt(membership.getJoinedAt())
+                .joinedOn(membership.getJoinedOn())
                 .build();
     }
 
@@ -78,7 +78,7 @@ public class DtoMapper {
                 .username(member.getUsername())
                 .userImage(member.getProfilePicture())
                 .role(membership.getRole())
-                .joinedAt(membership.getJoinedAt())
+                .joinedOn(membership.getJoinedOn())
                 .build();
     }
 
