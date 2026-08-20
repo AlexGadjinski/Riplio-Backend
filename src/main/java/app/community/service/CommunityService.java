@@ -162,7 +162,7 @@ public class CommunityService {
             User actingUser = userService.getById(actingUserId);
             boolean actingIsModerator = membershipRepository.existsByMemberAndCommunityAndRole(
                     actingUser, community, CommunityRole.MODERATOR);
-            if (!actingIsOwner && !actingIsModerator) {
+            if (!actingIsModerator) {
                 throw new ForbiddenOperationException("Only the owner or moderators can promote members.");
             }
         } else if (!actingIsOwner) {
@@ -174,6 +174,39 @@ public class CommunityService {
 
         targetMembership.setMember(targetUser);
         return targetMembership;
+    }
+
+    public void removeMember(UUID communityId, UUID actingUserId, UUID targetUserId) {
+        Community community = getById(communityId);
+        User targetUser = userService.getById(targetUserId);
+
+        if (targetUserId.equals(community.getOwner().getId())) {
+            throw new BusinessRuleException("The community owner cannot be removed. Transfer ownership first.");
+        }
+
+        CommunityMembership targetMembership = membershipRepository.findByMemberAndCommunity(targetUser, community)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User [%s] is not a member of this community.".formatted(targetUserId)));
+
+        boolean isSelfRemoval = actingUserId.equals(targetUserId);
+
+        if (!isSelfRemoval) {
+            boolean actingIsOwner = community.getOwner().getId().equals(actingUserId);
+
+            if (!actingIsOwner && targetMembership.getRole() == CommunityRole.MODERATOR) {
+                throw new ForbiddenOperationException("Only the owner can remove a moderator.");
+            }
+
+            User actingUser = userService.getById(actingUserId);
+            boolean actingIsModerator = membershipRepository.existsByMemberAndCommunityAndRole(
+                    actingUser, community, CommunityRole.MODERATOR);
+
+            if (!actingIsModerator) {
+                throw new ForbiddenOperationException("Only the owner or moderators can remove members.");
+            }
+        }
+
+        membershipRepository.delete(targetMembership);
     }
 
     private Community initializeCommunity(String name, String description, User owner) {

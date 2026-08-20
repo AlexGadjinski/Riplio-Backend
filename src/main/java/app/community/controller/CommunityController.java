@@ -104,6 +104,14 @@ public class CommunityController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{id}/members/{userId}")
+    public ResponseEntity<Void> removeMember(@AuthenticationPrincipal UserPrincipal principal,
+                                             @PathVariable(name = "id") UUID communityId,
+                                             @PathVariable UUID userId) {
+        communityService.removeMember(communityId, principal.getUserId(), userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<CommunityResponse> getCommunityById(@PathVariable UUID id) {
         Community community = communityService.getById(id);
