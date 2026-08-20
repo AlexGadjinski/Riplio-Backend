@@ -20,6 +20,8 @@ public interface CommunityMembershipRepository extends JpaRepository<CommunityMe
 
     Optional<CommunityMembership> findByMemberAndCommunity(User member, Community community);
 
+    boolean existsByMemberAndCommunityAndRole(User member, Community community, CommunityRole role);
+
     @Query("""
             SELECT cm FROM CommunityMembership cm JOIN FETCH cm.member
             WHERE cm.community = :community AND (:role IS NULL OR cm.role = :role)

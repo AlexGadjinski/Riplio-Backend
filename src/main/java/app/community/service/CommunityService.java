@@ -139,6 +139,43 @@ public class CommunityService {
         return membershipRepository.save(initializeCommunityMembership(member, community, CommunityRole.MEMBER));
     }
 
+    public CommunityMembership updateMember(UUID communityId, UUID actingUserId, UUID targetUserId, CommunityRole newRole) {
+        Community community = getById(communityId);
+        User targetUser = userService.getById(targetUserId);
+
+        if (targetUserId.equals(community.getOwner().getId())) {
+            throw new BusinessRuleException("The community owner's role cannot be changed. Transfer ownership first.");
+        }
+
+        CommunityMembership targetMembership = membershipRepository.findByMemberAndCommunity(targetUser, community)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User [%s] is not a member of this community.".formatted(targetUserId)));
+
+        if (targetMembership.getRole() == newRole) {
+            throw new ResourceConflictException("User already has [%s] role.".formatted(newRole));
+        }
+
+        boolean actingIsOwner = community.getOwner().getId().equals(actingUserId);
+        boolean isPromotion = newRole == CommunityRole.MODERATOR;
+
+        if (isPromotion) {
+            User actingUser = userService.getById(actingUserId);
+            boolean actingIsModerator = membershipRepository.existsByMemberAndCommunityAndRole(
+                    actingUser, community, CommunityRole.MODERATOR);
+            if (!actingIsOwner && !actingIsModerator) {
+                throw new ForbiddenOperationException("Only the owner or moderators can promote members.");
+            }
+        } else if (!actingIsOwner) {
+            throw new ForbiddenOperationException("Only the owner can demote moderators.");
+        }
+
+        targetMembership.setRole(newRole);
+        membershipRepository.save(targetMembership);
+
+        targetMembership.setMember(targetUser);
+        return targetMembership;
+    }
+
     private Community initializeCommunity(String name, String description, User owner) {
         LocalDateTime now = LocalDateTime.now();
 

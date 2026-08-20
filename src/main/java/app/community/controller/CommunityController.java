@@ -92,6 +92,18 @@ public class CommunityController {
                 .body(response);
     }
 
+    @PatchMapping("/{id}/members/{userId}")
+    public ResponseEntity<UpdateMemberResponse> updateMember(@AuthenticationPrincipal UserPrincipal principal,
+                                                             @PathVariable(name = "id") UUID communityId,
+                                                             @PathVariable UUID userId,
+                                                             @Valid @RequestBody UpdateMemberRequest request) {
+        CommunityMembership membership = communityService.updateMember(
+                communityId, principal.getUserId(), userId, request.getRole());
+        UpdateMemberResponse response = DtoMapper.toUpdateMemberResponse(membership);
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<CommunityResponse> getCommunityById(@PathVariable UUID id) {
         Community community = communityService.getById(id);

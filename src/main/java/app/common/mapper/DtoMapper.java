@@ -62,6 +62,14 @@ public class DtoMapper {
                 .build();
     }
 
+    public static UpdateMemberResponse toUpdateMemberResponse(CommunityMembership membership) {
+        return UpdateMemberResponse.builder()
+                .memberId(membership.getMember().getId())
+                .username(membership.getMember().getUsername())
+                .role(membership.getRole())
+                .build();
+    }
+
     public static CommunityMemberResponse toCommunityMemberResponse(CommunityMembership membership) {
         User member = membership.getMember();
 
