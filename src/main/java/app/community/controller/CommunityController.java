@@ -143,6 +143,14 @@ public class CommunityController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCommunity(@AuthenticationPrincipal UserPrincipal principal,
+                                                @PathVariable UUID id) {
+        communityService.deleteCommunity(id, principal.getUserId());
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     public ResponseEntity<PagedResponse<CommunityResponse>> getAllCommunities(
             @PageableDefault(size = 20) Pageable pageable) {

@@ -26,4 +26,6 @@ public interface CommunityBanRepository extends JpaRepository<CommunityBan, UUID
             WHERE b.community = :community
             """)
     Page<CommunityBan> findByCommunityWithBannedMember(Community community, Pageable pageable);
+
+    void deleteByCommunity(Community community);
 }

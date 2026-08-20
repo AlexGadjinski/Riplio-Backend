@@ -29,4 +29,6 @@ public interface CommunityMembershipRepository extends JpaRepository<CommunityMe
     Page<CommunityMembership> findByCommunityAndRoleWithMember(Community community,
                                                                CommunityRole role,
                                                                Pageable pageable);
+
+    void deleteByCommunity(Community community);
 }

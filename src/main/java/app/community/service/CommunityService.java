@@ -118,6 +118,16 @@ public class CommunityService {
         return community;
     }
 
+    @Transactional
+    public void deleteCommunity(UUID communityId, UUID userId) {
+        Community community = getById(communityId);
+        requireOwner(community, userId, "Only the community owner can delete this community.");
+
+        banRepository.deleteByCommunity(community);
+        membershipRepository.deleteByCommunity(community);
+        communityRepository.delete(community);
+    }
+
     public CommunityMembership joinCommunity(UUID userId, UUID communityId) {
         Community community = getById(communityId);
         User member = userService.getById(userId);
