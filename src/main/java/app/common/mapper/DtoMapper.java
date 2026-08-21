@@ -1,6 +1,9 @@
 package app.common.mapper;
 
 import app.auth.dto.LoginResponse;
+import app.comment.dto.CommentResponse;
+import app.comment.model.Comment;
+import app.comment.model.CommentStatus;
 import app.community.dto.*;
 import app.community.model.Community;
 import app.community.model.CommunityBan;
@@ -12,8 +15,14 @@ import app.user.dto.UpdateAvatarResponse;
 import app.user.model.User;
 import lombok.experimental.UtilityClass;
 
+import java.util.UUID;
+
 @UtilityClass
 public class DtoMapper {
+
+    private static final String DELETED_AUTHOR_PLACEHOLDER = "[deleted]";
+    private static final String DELETED_CONTENT_TEXT = "[this comment self-destructed]";
+    private static final String REMOVED_CONTENT_TEXT = "[zapped by a moderator]";
 
     public static LoginResponse toLoginResponse(GeneratedToken generatedToken) {
         return LoginResponse.builder()
@@ -115,6 +124,30 @@ public class DtoMapper {
                 .communityId(post.getCommunity().getId())
                 .authorUsername(post.getAuthor().getUsername())
                 .createdOn(post.getCreatedOn())
+                .build();
+    }
+
+    public static CommentResponse toCommentResponse(Comment comment) {
+        boolean showAuthor = comment.isActive() || comment.isRemoved();
+
+        String authorUsername = showAuthor ? comment.getAuthor().getUsername() : DELETED_AUTHOR_PLACEHOLDER;
+        String authorAvatarUrl = showAuthor ? comment.getAuthor().getProfilePicture() : null;
+        String content = comment.isActive()
+                ? comment.getContent()
+                : (comment.isDeleted() ? DELETED_CONTENT_TEXT : REMOVED_CONTENT_TEXT);
+        String imageUrl = comment.isActive() ? comment.getImageUrl() : null;
+        UUID parentCommentId = comment.getParentComment() == null ? null : comment.getParentComment().getId();
+
+        return CommentResponse.builder()
+                .id(comment.getId())
+                .content(content)
+                .imageUrl(imageUrl)
+                .authorUsername(authorUsername)
+                .authorAvatarUrl(authorAvatarUrl)
+                .parentCommentId(parentCommentId)
+                .replyCount(comment.getReplyCount())
+                .status(comment.getStatus())
+                .createdOn(comment.getCreatedOn())
                 .build();
     }
 
