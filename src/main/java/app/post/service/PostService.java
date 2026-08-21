@@ -46,7 +46,7 @@ public class PostService {
         boolean hasContent = StringUtils.isNotBlank(request.getContent());
 
         if (!hasContent && !hasMedia) {
-            throw new BusinessRuleException("A post must contain text, media or both.");
+            throw new BusinessRuleException("A post must contain text, media, or both.");
         }
 
         String mediaUrl = null;

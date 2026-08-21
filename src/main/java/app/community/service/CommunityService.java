@@ -263,6 +263,10 @@ public class CommunityService {
         return membershipRepository.existsByMemberAndCommunityAndRole(user, community, CommunityRole.MODERATOR);
     }
 
+    public boolean isMember(Community community, User user) {
+        return membershipRepository.existsByMemberAndCommunity(user, community);
+    }
+
     private Community initializeCommunity(String name, String description, User owner) {
         LocalDateTime now = LocalDateTime.now();
 
@@ -292,10 +296,6 @@ public class CommunityService {
                 .reason(request.getReason())
                 .bannedOn(LocalDateTime.now())
                 .build();
-    }
-
-    public boolean isMember(Community community, User user) {
-        return membershipRepository.existsByMemberAndCommunity(user, community);
     }
 
     public Community getById(UUID id) {
