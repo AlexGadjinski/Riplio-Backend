@@ -15,6 +15,8 @@ import app.user.model.User;
 import app.user.service.UserService;
 import com.cloudinary.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,6 +57,12 @@ public class CommentService {
         }
 
         return commentRepository.save(initializeComment(request.getContent(), imageUrl, post, author, null));
+    }
+
+    public Page<Comment> getTopLevelComments(UUID postId, Pageable pageable) {
+        Post post = postService.getById(postId);
+
+        return commentRepository.findTopLevelByPostWithAuthor(post, pageable);
     }
 
     private Comment initializeComment(String content, String imageUrl, Post post, User author, Comment parentComment) {
