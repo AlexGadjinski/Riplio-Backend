@@ -2,6 +2,7 @@ package app.post.service;
 
 import app.common.exception.BusinessRuleException;
 import app.common.exception.ForbiddenOperationException;
+import app.common.exception.ResourceNotFoundException;
 import app.common.storage.CloudinaryService;
 import app.common.storage.FileValidator;
 import app.community.model.Community;
@@ -58,6 +59,11 @@ public class PostService {
 
         return postRepository.save(
                 initializePost(request.getTitle(), request.getContent(), mediaUrl, mediaType, community, author));
+    }
+
+    public Post getById(UUID id) {
+        return postRepository.findByIdWithAuthor(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post with id [%s] does not exist.".formatted(id)));
     }
 
     public Page<Post> getPosts(UUID communityId, Pageable pageable) {
