@@ -12,7 +12,11 @@ import java.io.IOException;
 import java.util.Set;
 
 /**
- * Validates uploaded files by their actual content type and size.
+ * Validates uploaded files based on their actual content type and size.
+ * <p>
+ * The content type is detected from the file content rather than relying on the
+ * client-provided {@code Content-Type} header.
+ * </p>
  */
 @Component
 @RequiredArgsConstructor
@@ -27,22 +31,25 @@ public class FileValidator {
     private final Tika tika = new Tika();
 
     /**
-     * Validates that the file is a supported image within the allowed size.
+     * Validates that the file is a supported image and does not exceed the maximum configured
+     * image size.
      */
-    public void validateImage(MultipartFile file) {
-        String detectedType = detectContentType(file);
+    public String validateImage(MultipartFile file) {
+        String detectedContentType = detectContentType(file);
 
-        if (!ALLOWED_IMAGE_TYPES.contains(detectedType)) {
+        if (!ALLOWED_IMAGE_TYPES.contains(detectedContentType)) {
             throw new InvalidFileException("Only JPEG and PNG files are allowed.");
         }
 
         validateSize(file, uploadProperties.getMaxImageSize());
+        return detectedContentType;
     }
 
     /**
-     * Validates that the file is an image or video within the allowed size for its type.
+     * Validates that the file is an image or video and does not exceed the corresponding
+     * configured size limit.
      */
-    public void validateMedia(MultipartFile file) {
+    public String validateMedia(MultipartFile file) {
         String detectedContentType = detectContentType(file);
 
         if (detectedContentType.startsWith(IMAGE_MIME_PREFIX)) {
@@ -52,10 +59,12 @@ public class FileValidator {
         } else {
             throw new InvalidFileException("Only image and video files are allowed.");
         }
+
+        return detectedContentType;
     }
 
     /**
-     * Detects the real MIME type from file content, ignoring the client-supplied Content-Type header.
+     * Detects the actual MIME type from the file content.
      */
     private String detectContentType(MultipartFile file) {
         try {
@@ -66,7 +75,7 @@ public class FileValidator {
     }
 
     /**
-     * Throws if the file exceeds the given maximum size.
+     * Validates that the file does not exceed the specified maximum size.
      */
     private void validateSize(MultipartFile file, DataSize maxSize) {
         if (file.getSize() > maxSize.toBytes()) {
