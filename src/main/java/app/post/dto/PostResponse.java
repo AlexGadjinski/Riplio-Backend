@@ -19,5 +19,4 @@ public class PostResponse {
     private UUID communityId;
     private String authorUsername;
     private LocalDateTime createdOn;
-    private LocalDateTime updatedOn;
 }

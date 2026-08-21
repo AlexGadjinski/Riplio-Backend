@@ -88,8 +88,6 @@ public class PostService {
 
     private Post initializePost(String title, String content, String mediaUrl, PostMediaType mediaType,
                                 Community community, User author) {
-        LocalDateTime now = LocalDateTime.now();
-
         return Post.builder()
                 .title(title)
                 .content(content)
@@ -97,8 +95,7 @@ public class PostService {
                 .mediaType(mediaType)
                 .community(community)
                 .author(author)
-                .createdOn(now)
-                .updatedOn(now)
+                .createdOn(LocalDateTime.now())
                 .build();
     }
 }

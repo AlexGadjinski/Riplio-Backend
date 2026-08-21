@@ -43,7 +43,4 @@ public class Post {
 
     @Column(nullable = false)
     private LocalDateTime createdOn;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedOn;
 }

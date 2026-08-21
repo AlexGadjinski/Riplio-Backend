@@ -115,7 +115,6 @@ public class DtoMapper {
                 .communityId(post.getCommunity().getId())
                 .authorUsername(post.getAuthor().getUsername())
                 .createdOn(post.getCreatedOn())
-                .updatedOn(post.getUpdatedOn())
                 .build();
     }
 
