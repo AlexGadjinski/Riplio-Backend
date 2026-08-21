@@ -7,7 +7,7 @@ import app.common.storage.CloudinaryService;
 import app.common.storage.FileValidator;
 import app.community.model.Community;
 import app.community.service.CommunityService;
-import app.post.dto.UpsertPostRequest;
+import app.post.dto.CreatePostRequest;
 import app.post.model.Post;
 import app.post.model.PostMediaType;
 import app.post.repository.PostRepository;
@@ -33,7 +33,7 @@ public class PostService {
     private final UserService userService;
     private final CommunityService communityService;
 
-    public Post createPost(UUID communityId, UUID authorId, UpsertPostRequest request) {
+    public Post createPost(UUID communityId, UUID authorId, CreatePostRequest request) {
         Community community = communityService.getById(communityId);
         User author = userService.getById(authorId);
 

@@ -3,7 +3,7 @@ package app.post.controller;
 import app.common.dto.PagedResponse;
 import app.common.mapper.DtoMapper;
 import app.post.dto.PostResponse;
-import app.post.dto.UpsertPostRequest;
+import app.post.dto.CreatePostRequest;
 import app.post.model.Post;
 import app.post.service.PostService;
 import app.security.UserPrincipal;
@@ -30,7 +30,7 @@ public class PostController {
     @PostMapping("/communities/{communityId}/posts")
     public ResponseEntity<PostResponse> createPost(@AuthenticationPrincipal UserPrincipal principal,
                                                    @PathVariable UUID communityId,
-                                                   @Valid @ModelAttribute UpsertPostRequest request) {
+                                                   @Valid @ModelAttribute CreatePostRequest request) {
         Post post = postService.createPost(communityId, principal.getUserId(), request);
         PostResponse response = DtoMapper.toPostResponse(post);
 
