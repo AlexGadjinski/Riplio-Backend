@@ -5,6 +5,8 @@ import app.community.dto.*;
 import app.community.model.Community;
 import app.community.model.CommunityBan;
 import app.community.model.CommunityMembership;
+import app.post.dto.PostResponse;
+import app.post.model.Post;
 import app.security.jwt.GeneratedToken;
 import app.user.dto.UpdateAvatarResponse;
 import app.user.model.User;
@@ -100,6 +102,20 @@ public class DtoMapper {
                 .userImage(member.getProfilePicture())
                 .role(membership.getRole())
                 .joinedOn(membership.getJoinedOn())
+                .build();
+    }
+
+    public static PostResponse toPostResponse(Post post) {
+        return PostResponse.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .mediaUrl(post.getMediaUrl())
+                .mediaType(post.getMediaType())
+                .communityId(post.getCommunity().getId())
+                .authorUsername(post.getAuthor().getUsername())
+                .createdOn(post.getCreatedOn())
+                .updatedOn(post.getUpdatedOn())
                 .build();
     }
 

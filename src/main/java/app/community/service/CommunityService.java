@@ -294,6 +294,10 @@ public class CommunityService {
                 .build();
     }
 
+    public boolean isMember(Community community, User user) {
+        return membershipRepository.existsByMemberAndCommunity(user, community);
+    }
+
     public Community getById(UUID id) {
         return communityRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Community with id [%s] does not exist.".formatted(id)));
