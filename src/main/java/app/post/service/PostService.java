@@ -14,6 +14,8 @@ import app.user.model.User;
 import app.user.service.UserService;
 import com.cloudinary.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -56,6 +58,12 @@ public class PostService {
 
         return postRepository.save(
                 initializePost(request.getTitle(), request.getContent(), mediaUrl, mediaType, community, author));
+    }
+
+    public Page<Post> getPosts(UUID communityId, Pageable pageable) {
+        Community community = communityService.getById(communityId);
+
+        return postRepository.findByCommunityWithAuthor(community, pageable);
     }
 
     private Post initializePost(String title, String content, String mediaUrl, PostMediaType mediaType,
