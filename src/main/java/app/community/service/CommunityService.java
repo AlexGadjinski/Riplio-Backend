@@ -259,7 +259,7 @@ public class CommunityService {
         return community.getOwner().getId().equals(userId);
     }
 
-    private boolean isModerator(Community community, User user) {
+    public boolean isModerator(Community community, User user) {
         return membershipRepository.existsByMemberAndCommunityAndRole(user, community, CommunityRole.MODERATOR);
     }
 

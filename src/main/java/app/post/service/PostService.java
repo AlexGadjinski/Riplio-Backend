@@ -61,6 +61,20 @@ public class PostService {
                 initializePost(request.getTitle(), request.getContent(), mediaUrl, mediaType, community, author));
     }
 
+    public void deletePost(UUID postId, UUID actingUserId) {
+        Post post = getById(postId);
+
+        boolean isAuthor = post.getAuthor().getId().equals(actingUserId);
+        if (!isAuthor) {
+            User actingUser = userService.getById(actingUserId);
+            if (!communityService.isModerator(post.getCommunity(), actingUser)) {
+                throw new ForbiddenOperationException("Only the author or a community moderator can delete this post.");
+            }
+        }
+
+        postRepository.delete(post);
+    }
+
     public Post getById(UUID id) {
         return postRepository.findByIdWithAuthor(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post with id [%s] does not exist.".formatted(id)));

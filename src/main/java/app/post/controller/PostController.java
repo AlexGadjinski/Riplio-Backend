@@ -2,8 +2,8 @@ package app.post.controller;
 
 import app.common.dto.PagedResponse;
 import app.common.mapper.DtoMapper;
-import app.post.dto.PostResponse;
 import app.post.dto.CreatePostRequest;
+import app.post.dto.PostResponse;
 import app.post.model.Post;
 import app.post.service.PostService;
 import app.security.UserPrincipal;
@@ -57,5 +57,13 @@ public class PostController {
         PostResponse response = DtoMapper.toPostResponse(post);
 
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/posts/{id}")
+    public ResponseEntity<Void> deletePost(@AuthenticationPrincipal UserPrincipal principal,
+                                           @PathVariable UUID id) {
+        postService.deletePost(id, principal.getUserId());
+
+        return ResponseEntity.noContent().build();
     }
 }
