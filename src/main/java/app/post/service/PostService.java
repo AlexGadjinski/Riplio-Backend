@@ -37,7 +37,7 @@ public class PostService {
         Community community = communityService.getById(communityId);
         User author = userService.getById(authorId);
 
-        if (!communityService.isMember(community, author)) {
+        if (communityService.isNotMember(community, author)) {
             throw new ForbiddenOperationException("You must be a member of this community to create a post.");
         }
 
@@ -67,9 +67,8 @@ public class PostService {
         boolean isAuthor = post.getAuthor().getId().equals(actingUserId);
         if (!isAuthor) {
             User actingUser = userService.getById(actingUserId);
-            if (!communityService.isModerator(post.getCommunity(), actingUser)) {
-                throw new ForbiddenOperationException("Only the author or a community moderator can delete this post.");
-            }
+            communityService.requireModerator(post.getCommunity(),
+                    actingUser, "Only the author or a community moderator can delete this post.");
         }
 
         postRepository.delete(post);

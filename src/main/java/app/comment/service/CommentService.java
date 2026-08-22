@@ -55,7 +55,7 @@ public class CommentService {
     private Comment createComment(Post post, UUID authorId, Comment parentComment, CreateCommentRequest request) {
         User author = userService.getById(authorId);
 
-        if (!communityService.isMember(post.getCommunity(), author)) {
+        if (communityService.isNotMember(post.getCommunity(), author)) {
             throw new ForbiddenOperationException("You must be a member of this community to comment.");
         }
 
@@ -134,10 +134,6 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
-    private boolean isAuthor(Comment comment, UUID userId) {
-        return comment.getAuthor().getId().equals(userId);
-    }
-
     public Page<Comment> getTopLevelComments(UUID postId, Pageable pageable) {
         Post post = postService.getById(postId);
 
@@ -177,6 +173,10 @@ public class CommentService {
     public Comment getById(UUID id) {
         return commentRepository.findByIdWithAuthor(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment with id [%s] does not exist.".formatted(id)));
+    }
+
+    private boolean isAuthor(Comment comment, UUID userId) {
+        return comment.getAuthor().getId().equals(userId);
     }
 
     private Comment initializeComment(String content, String imageUrl, Post post, User author, Comment parentComment) {

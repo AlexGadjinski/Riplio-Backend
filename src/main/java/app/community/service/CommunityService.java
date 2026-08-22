@@ -159,7 +159,7 @@ public class CommunityService {
         if (isPromotion) {
             User actingUser = userService.getById(actingUserId);
             requireModerator(community, actingUser, "Only the owner or moderators can promote members.");
-        } else if (!isOwner(community, actingUserId)) {
+        } else if (isNotOwner(community, actingUserId)) {
             throw new ForbiddenOperationException("Only the owner can demote moderators.");
         }
 
@@ -180,7 +180,7 @@ public class CommunityService {
         boolean isSelfRemoval = actingUserId.equals(targetUserId);
 
         if (!isSelfRemoval) {
-            if (!isOwner(community, actingUserId) && targetMembership.getRole() == CommunityRole.MODERATOR) {
+            if (isNotOwner(community, actingUserId) && targetMembership.getRole() == CommunityRole.MODERATOR) {
                 throw new ForbiddenOperationException("Only the owner can kick a moderator.");
             }
 
@@ -205,7 +205,7 @@ public class CommunityService {
 
         CommunityMembership targetMembership = requireMembership(community, targetUser);
 
-        if (!isOwner(community, actingUserId) && targetMembership.getRole() == CommunityRole.MODERATOR) {
+        if (isNotOwner(community, actingUserId) && targetMembership.getRole() == CommunityRole.MODERATOR) {
             throw new ForbiddenOperationException("Only the owner can ban a moderator.");
         }
 
@@ -232,13 +232,13 @@ public class CommunityService {
     }
 
     private void requireOwner(Community community, UUID userId, String message) {
-        if (!isOwner(community, userId)) {
+        if (isNotOwner(community, userId)) {
             throw new ForbiddenOperationException(message);
         }
     }
 
     public void requireModerator(Community community, User user, String message) {
-        if (!isModerator(community, user)) {
+        if (isNotModerator(community, user)) {
             throw new ForbiddenOperationException(message);
         }
     }
@@ -255,16 +255,16 @@ public class CommunityService {
                         "User with id [%s] is not a member of this community.".formatted(user.getId())));
     }
 
-    private boolean isOwner(Community community, UUID userId) {
-        return community.getOwner().getId().equals(userId);
+    private boolean isNotOwner(Community community, UUID userId) {
+        return !community.getOwner().getId().equals(userId);
     }
 
-    public boolean isModerator(Community community, User user) {
-        return membershipRepository.existsByMemberAndCommunityAndRole(user, community, CommunityRole.MODERATOR);
+    public boolean isNotModerator(Community community, User user) {
+        return !membershipRepository.existsByMemberAndCommunityAndRole(user, community, CommunityRole.MODERATOR);
     }
 
-    public boolean isMember(Community community, User user) {
-        return membershipRepository.existsByMemberAndCommunity(user, community);
+    public boolean isNotMember(Community community, User user) {
+        return !membershipRepository.existsByMemberAndCommunity(user, community);
     }
 
     private Community initializeCommunity(String name, String description, User owner) {
