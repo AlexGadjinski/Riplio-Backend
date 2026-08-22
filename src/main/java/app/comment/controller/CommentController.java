@@ -1,8 +1,9 @@
 package app.comment.controller;
 
 import app.comment.dto.CommentResponse;
-import app.comment.dto.ProfileCommentResponse;
 import app.comment.dto.CreateCommentRequest;
+import app.comment.dto.ProfileCommentResponse;
+import app.comment.dto.UpdateCommentRequest;
 import app.comment.model.Comment;
 import app.comment.service.CommentService;
 import app.common.dto.PagedResponse;
@@ -53,6 +54,16 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/comments/{id}")
+    public ResponseEntity<CommentResponse> updateComment(@AuthenticationPrincipal UserPrincipal principal,
+                                                         @PathVariable UUID id,
+                                                         @ModelAttribute UpdateCommentRequest request) {
+        Comment comment = commentService.updateComment(id, principal.getUserId(), request);
+        CommentResponse response = DtoMapper.toCommentResponse(comment);
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/comments/{id}/replies")
     public ResponseEntity<CommentResponse> createReply(@AuthenticationPrincipal UserPrincipal principal,
                                                        @PathVariable(name = "id") UUID parentCommentId,
@@ -77,6 +88,15 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/comments/{id}/thread")
+    public ResponseEntity<List<CommentResponse>> getCommentThread(@PathVariable UUID id) {
+        List<CommentResponse> thread = commentService.getCommentThread(id).stream()
+                .map(DtoMapper::toCommentResponse)
+                .toList();
+
+        return ResponseEntity.ok(thread);
+    }
+
     @GetMapping("/users/{userId}/comments")
     public ResponseEntity<PagedResponse<ProfileCommentResponse>> getCommentsByAuthor(
             @PathVariable UUID userId,
@@ -87,14 +107,5 @@ public class CommentController {
         PagedResponse<ProfileCommentResponse> response = PagedResponse.from(comments);
 
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/comments/{id}/thread")
-    public ResponseEntity<List<CommentResponse>> getCommentThread(@PathVariable UUID id) {
-        List<CommentResponse> thread = commentService.getCommentThread(id).stream()
-                .map(DtoMapper::toCommentResponse)
-                .toList();
-
-        return ResponseEntity.ok(thread);
     }
 }

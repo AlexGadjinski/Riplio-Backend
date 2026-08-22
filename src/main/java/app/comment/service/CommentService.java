@@ -1,6 +1,7 @@
 package app.comment.service;
 
 import app.comment.dto.CreateCommentRequest;
+import app.comment.dto.UpdateCommentRequest;
 import app.comment.model.Comment;
 import app.comment.model.CommentStatus;
 import app.comment.repository.CommentRepository;
@@ -58,19 +59,8 @@ public class CommentService {
             throw new ForbiddenOperationException("You must be a member of this community to comment.");
         }
 
-        MultipartFile file = request.getFile();
-        boolean hasFile = StringUtils.isNotBlank(file);
-        boolean hasContent = StringUtils.isNotBlank(request.getContent());
-
-        if (!hasContent && !hasFile) {
-            throw new BusinessRuleException("A comment must contain text, an image, or both.");
-        }
-
-        String imageUrl = null;
-        if (hasFile) {
-            fileValidator.validateImage(file);
-            imageUrl = cloudinaryService.upload(file);
-        }
+        String imageUrl = resolveImageUrl(request.getFile(), null, false);
+        requireContentOrFile(request.getContent(), imageUrl);
 
         Comment comment = initializeComment(request.getContent(), imageUrl, post, author, parentComment);
         post.incrementCommentCount();
@@ -79,6 +69,48 @@ public class CommentService {
         }
 
         return commentRepository.save(comment);
+    }
+
+    public Comment updateComment(UUID commentId, UUID actingUserId, UpdateCommentRequest request) {
+        Comment comment = getById(commentId);
+
+        if (!comment.getAuthor().getId().equals(actingUserId)) {
+            throw new ForbiddenOperationException("Only the author can edit this comment.");
+        }
+
+        if (!comment.isActive()) {
+            throw new BusinessRuleException("Only active comments can be edited.");
+        }
+
+        String imageUrl = resolveImageUrl(request.getFile(), comment.getImageUrl(), request.isRemoveFile());
+        requireContentOrFile(request.getContent(), imageUrl);
+
+        comment.setContent(request.getContent());
+        comment.setImageUrl(imageUrl);
+        comment.setUpdatedOn(LocalDateTime.now());
+
+        commentRepository.save(comment);
+        return comment;
+    }
+
+    private String resolveImageUrl(MultipartFile file, String existingUrl, boolean removeFile) {
+        boolean hasFile = StringUtils.isNotBlank(file);
+
+        if (hasFile && removeFile) {
+            throw new BusinessRuleException("Cannot upload a new file and remove the file at the same time.");
+        } else if (removeFile) {
+            return null;
+        } else if (hasFile) {
+            fileValidator.validateImage(file);
+            return cloudinaryService.upload(file);
+        }
+        return existingUrl;
+    }
+
+    private void requireContentOrFile(String content, String imageUrl) {
+        if (StringUtils.isBlank(content) && StringUtils.isBlank(imageUrl)) {
+            throw new BusinessRuleException("A comment must contain text, an image, or both.");
+        }
     }
 
     public Page<Comment> getTopLevelComments(UUID postId, Pageable pageable) {
