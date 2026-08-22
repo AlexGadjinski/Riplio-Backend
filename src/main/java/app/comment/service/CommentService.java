@@ -23,6 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -96,8 +99,26 @@ public class CommentService {
         return commentRepository.findByAuthorWithPostAndCommunity(author, pageable);
     }
 
+    public List<Comment> getCommentThread(UUID commentId) {
+        List<Comment> thread = new ArrayList<>();
+        Comment comment = getById(commentId);
+
+        while (comment != null) {
+            thread.add(comment);
+
+            if (comment.getParentComment() == null) {
+                break;
+            }
+
+            comment = getById(comment.getParentComment().getId());
+        }
+
+        Collections.reverse(thread);
+        return thread;
+    }
+
     public Comment getById(UUID id) {
-        return commentRepository.findById(id)
+        return commentRepository.findByIdWithAuthor(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment with id [%s] does not exist.".formatted(id)));
     }
 

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -31,4 +32,10 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
             WHERE c.author = :author AND c.status = 'ACTIVE'
             """)
     Page<Comment> findByAuthorWithPostAndCommunity(User author, Pageable pageable);
+
+    @Query("""
+            SELECT c FROM Comment c JOIN FETCH c.author
+            WHERE c.id = :id
+            """)
+    Optional<Comment> findByIdWithAuthor(UUID id);
 }

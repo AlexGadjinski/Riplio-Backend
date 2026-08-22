@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -86,5 +87,14 @@ public class CommentController {
         PagedResponse<ProfileCommentResponse> response = PagedResponse.from(comments);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/comments/{id}/thread")
+    public ResponseEntity<List<CommentResponse>> getCommentThread(@PathVariable UUID id) {
+        List<CommentResponse> thread = commentService.getCommentThread(id).stream()
+                .map(DtoMapper::toCommentResponse)
+                .toList();
+
+        return ResponseEntity.ok(thread);
     }
 }
