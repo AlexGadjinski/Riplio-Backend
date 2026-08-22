@@ -13,7 +13,7 @@ public class CommunityMemberResponse {
 
     private UUID memberId;
     private String username;
-    private String userImage;
+    private String avatarUrl;
     private CommunityRole role;
     private LocalDateTime joinedOn;
 }

@@ -78,7 +78,7 @@ public class CommunityService {
         fileValidator.validateImage(file);
         String avatarUrl = cloudinaryService.upload(file);
 
-        community.setAvatar(avatarUrl);
+        community.setAvatarUrl(avatarUrl);
         community.setUpdatedOn(LocalDateTime.now());
         return communityRepository.save(community);
     }
@@ -90,7 +90,7 @@ public class CommunityService {
         fileValidator.validateImage(file);
         String bannerUrl = cloudinaryService.upload(file);
 
-        community.setBanner(bannerUrl);
+        community.setBannerUrl(bannerUrl);
         community.setUpdatedOn(LocalDateTime.now());
         return communityRepository.save(community);
     }

@@ -27,10 +27,10 @@ public class Community {
     private String description;
 
     @Basic
-    private String avatar;
+    private String avatarUrl;
 
     @Basic
-    private String banner;
+    private String bannerUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)

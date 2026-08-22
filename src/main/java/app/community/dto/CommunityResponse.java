@@ -13,7 +13,7 @@ public class CommunityResponse {
     private UUID id;
     private String name;
     private String description;
-    private String avatar;
-    private String banner;
+    private String avatarUrl;
+    private String bannerUrl;
     private LocalDateTime createdOn;
 }

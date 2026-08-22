@@ -40,21 +40,21 @@ public class DtoMapper {
                 .id(community.getId())
                 .name(community.getName())
                 .description(community.getDescription())
-                .avatar(community.getAvatar())
-                .banner(community.getBanner())
+                .avatarUrl(community.getAvatarUrl())
+                .bannerUrl(community.getBannerUrl())
                 .createdOn(community.getCreatedOn())
                 .build();
     }
 
     public static UpdateCommunityAvatarResponse toUpdateCommunityAvatarResponse(Community community) {
         return UpdateCommunityAvatarResponse.builder()
-                .avatar(community.getAvatar())
+                .avatarUrl(community.getAvatarUrl())
                 .build();
     }
 
     public static UpdateCommunityBannerResponse toUpdateCommunityBannerResponse(Community community) {
         return UpdateCommunityBannerResponse.builder()
-                .banner(community.getBanner())
+                .bannerUrl(community.getBannerUrl())
                 .build();
     }
 
@@ -108,7 +108,7 @@ public class DtoMapper {
         return CommunityMemberResponse.builder()
                 .memberId(member.getId())
                 .username(member.getUsername())
-                .userImage(member.getAvatarUrl())
+                .avatarUrl(member.getAvatarUrl())
                 .role(membership.getRole())
                 .joinedOn(membership.getJoinedOn())
                 .build();

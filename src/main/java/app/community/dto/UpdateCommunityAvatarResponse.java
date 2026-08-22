@@ -7,5 +7,5 @@ import lombok.Getter;
 @Getter
 public class UpdateCommunityAvatarResponse {
 
-    private String avatar;
+    private String avatarUrl;
 }
