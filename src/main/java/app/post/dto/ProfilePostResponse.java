@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Builder
 @Getter
-public class PostResponse {
+public class ProfilePostResponse {
 
     private UUID id;
     private String title;
@@ -19,7 +19,6 @@ public class PostResponse {
     private UUID communityId;
     private String communityName;
     private String communityAvatarUrl;
-    private String authorUsername;
     private int commentCount;
     private int rippleScore;
     private LocalDateTime createdOn;

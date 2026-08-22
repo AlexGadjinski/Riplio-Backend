@@ -16,5 +16,5 @@ public class CreatePostRequest {
 
     private String content;
 
-    private MultipartFile media;
+    private MultipartFile file;
 }

@@ -4,6 +4,7 @@ import app.common.dto.PagedResponse;
 import app.common.mapper.DtoMapper;
 import app.post.dto.CreatePostRequest;
 import app.post.dto.PostResponse;
+import app.post.dto.PostSummaryResponse;
 import app.post.model.Post;
 import app.post.service.PostService;
 import app.security.UserPrincipal;
@@ -40,13 +41,13 @@ public class PostController {
     }
 
     @GetMapping("/communities/{communityId}/posts")
-    public ResponseEntity<PagedResponse<PostResponse>> getPosts(
+    public ResponseEntity<PagedResponse<PostSummaryResponse>> getPosts(
             @PathVariable UUID communityId,
             @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<PostResponse> posts = postService.getPosts(communityId, pageable)
-                .map(DtoMapper::toPostResponse);
-        PagedResponse<PostResponse> response = PagedResponse.from(posts);
+        Page<PostSummaryResponse> posts = postService.getPosts(communityId, pageable)
+                .map(DtoMapper::toPostSummaryResponse);
+        PagedResponse<PostSummaryResponse> response = PagedResponse.from(posts);
 
         return ResponseEntity.ok(response);
     }

@@ -41,8 +41,8 @@ public class PostService {
             throw new ForbiddenOperationException("You must be a member of this community to create a post.");
         }
 
-        MultipartFile media = request.getMedia();
-        boolean hasMedia = StringUtils.isNotBlank(media);
+        MultipartFile file = request.getFile();
+        boolean hasMedia = StringUtils.isNotBlank(file);
         boolean hasContent = StringUtils.isNotBlank(request.getContent());
 
         if (!hasContent && !hasMedia) {
@@ -52,8 +52,8 @@ public class PostService {
         String mediaUrl = null;
         PostMediaType mediaType = null;
         if (hasMedia) {
-            String contentType = fileValidator.validateMedia(media);
-            mediaUrl = cloudinaryService.upload(media);
+            String contentType = fileValidator.validateMedia(file);
+            mediaUrl = cloudinaryService.upload(file);
             mediaType = PostMediaType.fromContentType(contentType);
         }
 
@@ -76,7 +76,7 @@ public class PostService {
     }
 
     public Post getById(UUID id) {
-        return postRepository.findByIdWithAuthor(id)
+        return postRepository.findByIdWithAuthorAndCommunity(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post with id [%s] does not exist.".formatted(id)));
     }
 
@@ -95,6 +95,8 @@ public class PostService {
                 .mediaType(mediaType)
                 .community(community)
                 .author(author)
+                .commentCount(0)
+                .rippleScore(0)
                 .createdOn(LocalDateTime.now())
                 .build();
     }

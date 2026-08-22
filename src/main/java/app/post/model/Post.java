@@ -42,5 +42,11 @@ public class Post {
     private User author;
 
     @Column(nullable = false)
+    private int commentCount;
+
+    @Column(nullable = false)
+    private int rippleScore;
+
+    @Column(nullable = false)
     private LocalDateTime createdOn;
 }

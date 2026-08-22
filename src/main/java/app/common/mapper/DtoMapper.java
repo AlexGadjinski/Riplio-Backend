@@ -9,6 +9,8 @@ import app.community.model.Community;
 import app.community.model.CommunityBan;
 import app.community.model.CommunityMembership;
 import app.post.dto.PostResponse;
+import app.post.dto.PostSummaryResponse;
+import app.post.dto.ProfilePostResponse;
 import app.post.model.Post;
 import app.security.jwt.GeneratedToken;
 import app.user.dto.UpdateAvatarResponse;
@@ -115,14 +117,53 @@ public class DtoMapper {
     }
 
     public static PostResponse toPostResponse(Post post) {
+        Community community = post.getCommunity();
+
         return PostResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .mediaUrl(post.getMediaUrl())
                 .mediaType(post.getMediaType())
-                .communityId(post.getCommunity().getId())
+                .communityId(community.getId())
+                .communityName(community.getName())
+                .communityAvatarUrl(community.getAvatarUrl())
                 .authorUsername(post.getAuthor().getUsername())
+                .commentCount(post.getCommentCount())
+                .rippleScore(post.getRippleScore())
+                .createdOn(post.getCreatedOn())
+                .build();
+    }
+
+    public static PostSummaryResponse toPostSummaryResponse(Post post) {
+        return PostSummaryResponse.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .mediaUrl(post.getMediaUrl())
+                .mediaType(post.getMediaType())
+                .authorUsername(post.getAuthor().getUsername())
+                .authorAvatarUrl(post.getAuthor().getAvatarUrl())
+                .commentCount(post.getCommentCount())
+                .rippleScore(post.getRippleScore())
+                .createdOn(post.getCreatedOn())
+                .build();
+    }
+
+    public static ProfilePostResponse toProfilePostResponse(Post post) {
+        Community community = post.getCommunity();
+
+        return ProfilePostResponse.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .mediaUrl(post.getMediaUrl())
+                .mediaType(post.getMediaType())
+                .communityId(community.getId())
+                .communityName(community.getName())
+                .communityAvatarUrl(community.getAvatarUrl())
+                .commentCount(post.getCommentCount())
+                .rippleScore(post.getRippleScore())
                 .createdOn(post.getCreatedOn())
                 .build();
     }

@@ -15,10 +15,10 @@ import java.util.UUID;
 public interface PostRepository extends JpaRepository<Post, UUID> {
 
     @Query("""
-            SELECT p FROM Post p JOIN FETCH p.author
+            SELECT p FROM Post p JOIN FETCH p.author JOIN FETCH p.community
             WHERE p.id = :id
             """)
-    Optional<Post> findByIdWithAuthor(UUID id);
+    Optional<Post> findByIdWithAuthorAndCommunity(UUID id);
 
     @Query("""
             SELECT p FROM Post p JOIN FETCH p.author

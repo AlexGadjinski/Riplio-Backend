@@ -9,17 +9,15 @@ import java.util.UUID;
 
 @Builder
 @Getter
-public class PostResponse {
+public class PostSummaryResponse {
 
     private UUID id;
     private String title;
     private String content;
     private String mediaUrl;
     private PostMediaType mediaType;
-    private UUID communityId;
-    private String communityName;
-    private String communityAvatarUrl;
     private String authorUsername;
+    private String authorAvatarUrl;
     private int commentCount;
     private int rippleScore;
     private LocalDateTime createdOn;
