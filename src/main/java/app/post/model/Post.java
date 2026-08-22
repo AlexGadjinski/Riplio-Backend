@@ -49,4 +49,16 @@ public class Post {
 
     @Column(nullable = false)
     private LocalDateTime createdOn;
+
+    public void incrementCommentCount() {
+        commentCount++;
+    }
+
+    public void incrementRippleScore() {
+        rippleScore++;
+    }
+
+    public void decrementRippleScore() {
+        rippleScore--;
+    }
 }
