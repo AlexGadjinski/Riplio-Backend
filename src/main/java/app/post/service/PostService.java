@@ -42,16 +42,16 @@ public class PostService {
         }
 
         MultipartFile file = request.getFile();
-        boolean hasMedia = StringUtils.isNotBlank(file);
+        boolean hasFile = StringUtils.isNotBlank(file);
         boolean hasContent = StringUtils.isNotBlank(request.getContent());
 
-        if (!hasContent && !hasMedia) {
+        if (!hasContent && !hasFile) {
             throw new BusinessRuleException("A post must contain text, media, or both.");
         }
 
         String mediaUrl = null;
         PostMediaType mediaType = null;
-        if (hasMedia) {
+        if (hasFile) {
             String contentType = fileValidator.validateMedia(file);
             mediaUrl = cloudinaryService.upload(file);
             mediaType = PostMediaType.fromContentType(contentType);

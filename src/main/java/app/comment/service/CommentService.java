@@ -59,15 +59,15 @@ public class CommentService {
         }
 
         MultipartFile file = request.getFile();
-        boolean hasImage = StringUtils.isNotBlank(file);
+        boolean hasFile = StringUtils.isNotBlank(file);
         boolean hasContent = StringUtils.isNotBlank(request.getContent());
 
-        if (!hasContent && !hasImage) {
+        if (!hasContent && !hasFile) {
             throw new BusinessRuleException("A comment must contain text, an image, or both.");
         }
 
         String imageUrl = null;
-        if (hasImage) {
+        if (hasFile) {
             fileValidator.validateImage(file);
             imageUrl = cloudinaryService.upload(file);
         }
