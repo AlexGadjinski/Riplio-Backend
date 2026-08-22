@@ -82,6 +82,12 @@ public class CommentService {
         return commentRepository.findTopLevelByPostWithAuthor(post, pageable);
     }
 
+    public Page<Comment> getReplies(UUID commentId, Pageable pageable) {
+        Comment parentComment = getById(commentId);
+
+        return commentRepository.findByParentCommentWithAuthor(parentComment, pageable);
+    }
+
     public Comment getById(UUID id) {
         return commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment with id [%s] does not exist.".formatted(id)));

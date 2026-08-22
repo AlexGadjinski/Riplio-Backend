@@ -62,4 +62,16 @@ public class CommentController {
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
+
+    @GetMapping("/comments/{id}/replies")
+    public ResponseEntity<PagedResponse<CommentResponse>> getReplies(
+            @PathVariable(name = "id") UUID commentId,
+            @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<CommentResponse> replies = commentService.getReplies(commentId, pageable)
+                .map(DtoMapper::toCommentResponse);
+        PagedResponse<CommentResponse> response = PagedResponse.from(replies);
+
+        return ResponseEntity.ok(response);
+    }
 }

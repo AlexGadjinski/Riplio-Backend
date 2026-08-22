@@ -18,4 +18,10 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
             WHERE c.post = :post AND c.parentComment IS NULL
             """)
     Page<Comment> findTopLevelByPostWithAuthor(Post post, Pageable pageable);
+
+    @Query("""
+            SELECT c FROM Comment c JOIN FETCH c.author
+            WHERE c.parentComment = :parentComment
+            """)
+    Page<Comment> findByParentCommentWithAuthor(Comment parentComment, Pageable pageable);
 }
