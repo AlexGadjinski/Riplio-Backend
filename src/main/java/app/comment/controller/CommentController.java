@@ -2,7 +2,7 @@ package app.comment.controller;
 
 import app.comment.dto.CommentResponse;
 import app.comment.dto.ProfileCommentResponse;
-import app.comment.dto.UpsertCommentRequest;
+import app.comment.dto.CreateCommentRequest;
 import app.comment.model.Comment;
 import app.comment.service.CommentService;
 import app.common.dto.PagedResponse;
@@ -32,7 +32,7 @@ public class CommentController {
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponse> createComment(@AuthenticationPrincipal UserPrincipal principal,
                                                          @PathVariable UUID postId,
-                                                         @Valid @ModelAttribute UpsertCommentRequest request) {
+                                                         @Valid @ModelAttribute CreateCommentRequest request) {
         Comment comment = commentService.createComment(postId, principal.getUserId(), request);
         CommentResponse response = DtoMapper.toCommentResponse(comment);
 
@@ -56,7 +56,7 @@ public class CommentController {
     @PostMapping("/comments/{id}/replies")
     public ResponseEntity<CommentResponse> createReply(@AuthenticationPrincipal UserPrincipal principal,
                                                        @PathVariable(name = "id") UUID parentCommentId,
-                                                       @Valid @ModelAttribute UpsertCommentRequest request) {
+                                                       @Valid @ModelAttribute CreateCommentRequest request) {
         Comment reply = commentService.createReply(parentCommentId, principal.getUserId(), request);
         CommentResponse response = DtoMapper.toCommentResponse(reply);
 

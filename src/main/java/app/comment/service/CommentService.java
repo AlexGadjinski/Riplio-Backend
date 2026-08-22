@@ -1,6 +1,6 @@
 package app.comment.service;
 
-import app.comment.dto.UpsertCommentRequest;
+import app.comment.dto.CreateCommentRequest;
 import app.comment.model.Comment;
 import app.comment.model.CommentStatus;
 import app.comment.repository.CommentRepository;
@@ -40,18 +40,18 @@ public class CommentService {
     private final PostService postService;
 
     @Transactional
-    public Comment createComment(UUID postId, UUID authorId, UpsertCommentRequest request) {
+    public Comment createComment(UUID postId, UUID authorId, CreateCommentRequest request) {
         Post post = postService.getById(postId);
         return createComment(post, authorId, null, request);
     }
 
     @Transactional
-    public Comment createReply(UUID parentCommentId, UUID authorId, UpsertCommentRequest request) {
+    public Comment createReply(UUID parentCommentId, UUID authorId, CreateCommentRequest request) {
         Comment parentComment = getById(parentCommentId);
         return createComment(parentComment.getPost(), authorId, parentComment, request);
     }
 
-    private Comment createComment(Post post, UUID authorId, Comment parentComment, UpsertCommentRequest request) {
+    private Comment createComment(Post post, UUID authorId, Comment parentComment, CreateCommentRequest request) {
         User author = userService.getById(authorId);
 
         if (!communityService.isMember(post.getCommunity(), author)) {
