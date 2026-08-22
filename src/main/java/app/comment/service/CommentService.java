@@ -6,6 +6,7 @@ import app.comment.model.CommentStatus;
 import app.comment.repository.CommentRepository;
 import app.common.exception.BusinessRuleException;
 import app.common.exception.ForbiddenOperationException;
+import app.common.exception.ResourceNotFoundException;
 import app.common.storage.CloudinaryService;
 import app.common.storage.FileValidator;
 import app.community.service.CommunityService;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -36,6 +38,16 @@ public class CommentService {
 
     public Comment createComment(UUID postId, UUID authorId, UpsertCommentRequest request) {
         Post post = postService.getById(postId);
+        return createComment(post, authorId, null, request);
+    }
+
+    @Transactional
+    public Comment createReply(UUID parentCommentId, UUID authorId, UpsertCommentRequest request) {
+        Comment parentComment = getById(parentCommentId);
+        return createComment(parentComment.getPost(), authorId, parentComment, request);
+    }
+
+    private Comment createComment(Post post, UUID authorId, Comment parentComment, UpsertCommentRequest request) {
         User author = userService.getById(authorId);
 
         if (!communityService.isMember(post.getCommunity(), author)) {
@@ -56,13 +68,23 @@ public class CommentService {
             imageUrl = cloudinaryService.upload(image);
         }
 
-        return commentRepository.save(initializeComment(request.getContent(), imageUrl, post, author, null));
+        Comment comment = initializeComment(request.getContent(), imageUrl, post, author, parentComment);
+        if (parentComment != null) {
+            parentComment.setReplyCount(parentComment.getReplyCount() + 1);
+        }
+
+        return commentRepository.save(comment);
     }
 
     public Page<Comment> getTopLevelComments(UUID postId, Pageable pageable) {
         Post post = postService.getById(postId);
 
         return commentRepository.findTopLevelByPostWithAuthor(post, pageable);
+    }
+
+    public Comment getById(UUID id) {
+        return commentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment with id [%s] does not exist.".formatted(id)));
     }
 
     private Comment initializeComment(String content, String imageUrl, Post post, User author, Comment parentComment) {

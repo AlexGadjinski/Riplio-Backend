@@ -50,4 +50,16 @@ public class CommentController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/comments/{id}/replies")
+    public ResponseEntity<CommentResponse> createReply(@AuthenticationPrincipal UserPrincipal principal,
+                                                       @PathVariable(name = "id") UUID parentCommentId,
+                                                       @Valid @ModelAttribute UpsertCommentRequest request) {
+        Comment reply = commentService.createReply(parentCommentId, principal.getUserId(), request);
+        CommentResponse response = DtoMapper.toCommentResponse(reply);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
 }
