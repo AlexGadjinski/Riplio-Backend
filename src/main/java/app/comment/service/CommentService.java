@@ -74,7 +74,7 @@ public class CommentService {
     public Comment updateComment(UUID commentId, UUID actingUserId, UpdateCommentRequest request) {
         Comment comment = getById(commentId);
 
-        if (!comment.getAuthor().getId().equals(actingUserId)) {
+        if (!isAuthor(comment, actingUserId)) {
             throw new ForbiddenOperationException("Only the author can edit this comment.");
         }
 
@@ -111,6 +111,31 @@ public class CommentService {
         if (StringUtils.isBlank(content) && StringUtils.isBlank(imageUrl)) {
             throw new BusinessRuleException("A comment must contain text, an image, or both.");
         }
+    }
+
+    @Transactional
+    public void deleteComment(UUID commentId, UUID actingUserId) {
+        Comment comment = getById(commentId);
+
+        if (!comment.isActive()) {
+            throw new BusinessRuleException("Only active comments can be deleted.");
+        }
+
+        if (isAuthor(comment, actingUserId)) {
+            comment.setStatus(CommentStatus.DELETED);
+        } else {
+            User actingUser = userService.getById(actingUserId);
+            communityService.requireModerator(comment.getPost().getCommunity(),
+                    actingUser, "Only the author or moderators can delete this comment.");
+            comment.setStatus(CommentStatus.REMOVED);
+        }
+
+        comment.setUpdatedOn(LocalDateTime.now());
+        commentRepository.save(comment);
+    }
+
+    private boolean isAuthor(Comment comment, UUID userId) {
+        return comment.getAuthor().getId().equals(userId);
     }
 
     public Page<Comment> getTopLevelComments(UUID postId, Pageable pageable) {

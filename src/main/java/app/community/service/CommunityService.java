@@ -237,7 +237,7 @@ public class CommunityService {
         }
     }
 
-    private void requireModerator(Community community, User user, String message) {
+    public void requireModerator(Community community, User user, String message) {
         if (!isModerator(community, user)) {
             throw new ForbiddenOperationException(message);
         }
