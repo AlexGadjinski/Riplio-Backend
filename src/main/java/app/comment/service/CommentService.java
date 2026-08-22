@@ -36,6 +36,7 @@ public class CommentService {
     private final CommunityService communityService;
     private final PostService postService;
 
+    @Transactional
     public Comment createComment(UUID postId, UUID authorId, UpsertCommentRequest request) {
         Post post = postService.getById(postId);
         return createComment(post, authorId, null, request);
