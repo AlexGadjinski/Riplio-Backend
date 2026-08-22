@@ -2,6 +2,7 @@ package app.post.model;
 
 import app.comment.model.Comment;
 import app.community.model.Community;
+import app.ripple.model.PostRipple;
 import app.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -54,6 +55,9 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Comment> comments;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<PostRipple> ripples;
 
     public void incrementCommentCount() {
         commentCount++;

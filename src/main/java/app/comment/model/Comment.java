@@ -1,11 +1,13 @@
 package app.comment.model;
 
 import app.post.model.Post;
+import app.ripple.model.CommentRipple;
 import app.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -53,6 +55,9 @@ public class Comment {
 
     @Column(nullable = false)
     private LocalDateTime updatedOn;
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
+    private List<CommentRipple> ripples;
 
     public boolean isActive() {
         return status == CommentStatus.ACTIVE;
