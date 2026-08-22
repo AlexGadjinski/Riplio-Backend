@@ -1,11 +1,13 @@
 package app.post.model;
 
+import app.comment.model.Comment;
 import app.community.model.Community;
 import app.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -49,6 +51,9 @@ public class Post {
 
     @Column(nullable = false)
     private LocalDateTime createdOn;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<Comment> comments;
 
     public void incrementCommentCount() {
         commentCount++;

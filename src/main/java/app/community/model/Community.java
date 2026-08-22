@@ -1,10 +1,12 @@
 package app.community.model;
 
+import app.post.model.Post;
 import app.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -41,4 +43,7 @@ public class Community {
 
     @Column(nullable = false)
     private LocalDateTime updatedOn;
+
+    @OneToMany(mappedBy = "community", cascade = CascadeType.REMOVE)
+    private List<Post> posts;
 }
