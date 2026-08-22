@@ -3,7 +3,6 @@ package app.common.mapper;
 import app.auth.dto.LoginResponse;
 import app.comment.dto.CommentResponse;
 import app.comment.model.Comment;
-import app.comment.model.CommentStatus;
 import app.community.dto.*;
 import app.community.model.Community;
 import app.community.model.CommunityBan;
@@ -187,6 +186,7 @@ public class DtoMapper {
                 .authorAvatarUrl(authorAvatarUrl)
                 .parentCommentId(parentCommentId)
                 .replyCount(comment.getReplyCount())
+                .rippleScore(comment.getRippleScore())
                 .status(comment.getStatus())
                 .createdOn(comment.getCreatedOn())
                 .build();

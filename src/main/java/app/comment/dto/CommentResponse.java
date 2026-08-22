@@ -18,6 +18,7 @@ public class CommentResponse {
     private String authorAvatarUrl;
     private UUID parentCommentId;
     private int replyCount;
+    private int rippleScore;
     private CommentStatus status;
     private LocalDateTime createdOn;
 }

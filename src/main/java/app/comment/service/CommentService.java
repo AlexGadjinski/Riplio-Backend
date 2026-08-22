@@ -54,8 +54,8 @@ public class CommentService {
             throw new ForbiddenOperationException("You must be a member of this community to comment.");
         }
 
-        MultipartFile image = request.getImage();
-        boolean hasImage = StringUtils.isNotBlank(image);
+        MultipartFile file = request.getFile();
+        boolean hasImage = StringUtils.isNotBlank(file);
         boolean hasContent = StringUtils.isNotBlank(request.getContent());
 
         if (!hasContent && !hasImage) {
@@ -64,13 +64,14 @@ public class CommentService {
 
         String imageUrl = null;
         if (hasImage) {
-            fileValidator.validateImage(image);
-            imageUrl = cloudinaryService.upload(image);
+            fileValidator.validateImage(file);
+            imageUrl = cloudinaryService.upload(file);
         }
 
         Comment comment = initializeComment(request.getContent(), imageUrl, post, author, parentComment);
+        post.incrementCommentCount();
         if (parentComment != null) {
-            parentComment.setReplyCount(parentComment.getReplyCount() + 1);
+            parentComment.incrementReplyCount();
         }
 
         return commentRepository.save(comment);
@@ -104,6 +105,7 @@ public class CommentService {
                 .parentComment(parentComment)
                 .status(CommentStatus.ACTIVE)
                 .replyCount(0)
+                .rippleScore(0)
                 .createdOn(now)
                 .updatedOn(now)
                 .build();

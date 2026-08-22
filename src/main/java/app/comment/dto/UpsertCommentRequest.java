@@ -9,5 +9,5 @@ import org.springframework.web.multipart.MultipartFile;
 public class UpsertCommentRequest {
 
     private String content;
-    private MultipartFile image;
+    private MultipartFile file;
 }

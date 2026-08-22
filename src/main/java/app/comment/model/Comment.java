@@ -46,6 +46,9 @@ public class Comment {
     private int replyCount;
 
     @Column(nullable = false)
+    private int rippleScore;
+
+    @Column(nullable = false)
     private LocalDateTime createdOn;
 
     @Column(nullable = false)
@@ -61,5 +64,17 @@ public class Comment {
 
     public boolean isRemoved() {
         return status == CommentStatus.REMOVED;
+    }
+
+    public void incrementReplyCount() {
+        replyCount++;
+    }
+
+    public void incrementRippleScore() {
+        rippleScore++;
+    }
+
+    public void decrementRippleScore() {
+        rippleScore--;
     }
 }
