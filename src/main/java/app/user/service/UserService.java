@@ -23,10 +23,10 @@ public class UserService {
     public User updateAvatar(UUID userId, MultipartFile file) {
         fileValidator.validateImage(file);
 
-        String imageUrl = cloudinaryService.upload(file);
+        String avatarUrl = cloudinaryService.upload(file);
 
         User user = getById(userId);
-        user.setProfilePicture(imageUrl);
+        user.setAvatarUrl(avatarUrl);
         user.setUpdatedOn(LocalDateTime.now());
         return userRepository.save(user);
     }

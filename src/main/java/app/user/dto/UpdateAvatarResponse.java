@@ -1,3 +1,3 @@
 package app.user.dto;
 
-public record UpdateAvatarResponse(String profilePicture) {}
+public record UpdateAvatarResponse(String avatarUrl) {}

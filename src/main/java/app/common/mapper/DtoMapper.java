@@ -32,7 +32,7 @@ public class DtoMapper {
     }
 
     public static UpdateAvatarResponse toUpdateAvatarResponse(User user) {
-        return new UpdateAvatarResponse(user.getProfilePicture());
+        return new UpdateAvatarResponse(user.getAvatarUrl());
     }
 
     public static CommunityResponse toCommunityResponse(Community community) {
@@ -94,9 +94,9 @@ public class DtoMapper {
         return BannedMemberResponse.builder()
                 .communityId(communityBan.getCommunity().getId())
                 .bannedUsername(communityBan.getBannedMember().getUsername())
-                .bannedAvatarUrl(communityBan.getBannedMember().getProfilePicture())
+                .bannedAvatarUrl(communityBan.getBannedMember().getAvatarUrl())
                 .bannedByUsername(communityBan.getBannedBy().getUsername())
-                .bannedByAvatarUrl(communityBan.getBannedBy().getProfilePicture())
+                .bannedByAvatarUrl(communityBan.getBannedBy().getAvatarUrl())
                 .reason(communityBan.getReason())
                 .bannedOn(communityBan.getBannedOn())
                 .build();
@@ -108,7 +108,7 @@ public class DtoMapper {
         return CommunityMemberResponse.builder()
                 .memberId(member.getId())
                 .username(member.getUsername())
-                .userImage(member.getProfilePicture())
+                .userImage(member.getAvatarUrl())
                 .role(membership.getRole())
                 .joinedOn(membership.getJoinedOn())
                 .build();
@@ -131,7 +131,7 @@ public class DtoMapper {
         boolean showAuthor = comment.isActive() || comment.isRemoved();
 
         String authorUsername = showAuthor ? comment.getAuthor().getUsername() : DELETED_AUTHOR_PLACEHOLDER;
-        String authorAvatarUrl = showAuthor ? comment.getAuthor().getProfilePicture() : null;
+        String authorAvatarUrl = showAuthor ? comment.getAuthor().getAvatarUrl() : null;
         String content = comment.isActive()
                 ? comment.getContent()
                 : (comment.isDeleted() ? DELETED_CONTENT_TEXT : REMOVED_CONTENT_TEXT);

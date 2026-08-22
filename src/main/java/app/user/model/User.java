@@ -29,7 +29,7 @@ public class User {
     private String password;
 
     @Basic
-    private String profilePicture;
+    private String avatarUrl;
 
     @Column(nullable = false)
     private LocalDateTime createdOn;
