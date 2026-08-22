@@ -90,6 +90,12 @@ public class CommentService {
         return commentRepository.findByParentCommentWithAuthor(parentComment, pageable);
     }
 
+    public Page<Comment> getCommentsByAuthor(UUID authorId, Pageable pageable) {
+        User author = userService.getById(authorId);
+
+        return commentRepository.findByAuthorWithPostAndCommunity(author, pageable);
+    }
+
     public Comment getById(UUID id) {
         return commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment with id [%s] does not exist.".formatted(id)));

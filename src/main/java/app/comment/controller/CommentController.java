@@ -1,6 +1,7 @@
 package app.comment.controller;
 
 import app.comment.dto.CommentResponse;
+import app.comment.dto.ProfileCommentResponse;
 import app.comment.dto.UpsertCommentRequest;
 import app.comment.model.Comment;
 import app.comment.service.CommentService;
@@ -71,6 +72,18 @@ public class CommentController {
         Page<CommentResponse> replies = commentService.getReplies(commentId, pageable)
                 .map(DtoMapper::toCommentResponse);
         PagedResponse<CommentResponse> response = PagedResponse.from(replies);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/{userId}/comments")
+    public ResponseEntity<PagedResponse<ProfileCommentResponse>> getCommentsByAuthor(
+            @PathVariable UUID userId,
+            @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<ProfileCommentResponse> comments = commentService.getCommentsByAuthor(userId, pageable)
+                .map(DtoMapper::toProfileCommentResponse);
+        PagedResponse<ProfileCommentResponse> response = PagedResponse.from(comments);
 
         return ResponseEntity.ok(response);
     }

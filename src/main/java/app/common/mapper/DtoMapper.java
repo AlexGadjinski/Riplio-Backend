@@ -2,6 +2,7 @@ package app.common.mapper;
 
 import app.auth.dto.LoginResponse;
 import app.comment.dto.CommentResponse;
+import app.comment.dto.ProfileCommentResponse;
 import app.comment.model.Comment;
 import app.community.dto.*;
 import app.community.model.Community;
@@ -188,6 +189,25 @@ public class DtoMapper {
                 .replyCount(comment.getReplyCount())
                 .rippleScore(comment.getRippleScore())
                 .status(comment.getStatus())
+                .createdOn(comment.getCreatedOn())
+                .build();
+    }
+
+    public static ProfileCommentResponse toProfileCommentResponse(Comment comment) {
+        Post post = comment.getPost();
+        Community community = post.getCommunity();
+
+        return ProfileCommentResponse.builder()
+                .id(comment.getId())
+                .communityId(community.getId())
+                .communityName(community.getName())
+                .communityAvatarUrl(community.getAvatarUrl())
+                .postId(post.getId())
+                .postTitle(post.getTitle())
+                .content(comment.getContent())
+                .imageUrl(comment.getImageUrl())
+                .replyCount(comment.getReplyCount())
+                .rippleScore(comment.getRippleScore())
                 .createdOn(comment.getCreatedOn())
                 .build();
     }
