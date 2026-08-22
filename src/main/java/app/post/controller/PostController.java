@@ -5,6 +5,7 @@ import app.common.mapper.DtoMapper;
 import app.post.dto.CreatePostRequest;
 import app.post.dto.PostResponse;
 import app.post.dto.PostSummaryResponse;
+import app.post.dto.ProfilePostResponse;
 import app.post.model.Post;
 import app.post.service.PostService;
 import app.security.UserPrincipal;
@@ -41,13 +42,25 @@ public class PostController {
     }
 
     @GetMapping("/communities/{communityId}/posts")
-    public ResponseEntity<PagedResponse<PostSummaryResponse>> getPosts(
+    public ResponseEntity<PagedResponse<PostSummaryResponse>> getPostsByCommunity(
             @PathVariable UUID communityId,
             @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<PostSummaryResponse> posts = postService.getPosts(communityId, pageable)
+        Page<PostSummaryResponse> posts = postService.getPostsByCommunity(communityId, pageable)
                 .map(DtoMapper::toPostSummaryResponse);
         PagedResponse<PostSummaryResponse> response = PagedResponse.from(posts);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/{userId}/posts")
+    public ResponseEntity<PagedResponse<ProfilePostResponse>> getPostsByAuthor(
+            @PathVariable UUID userId,
+            @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<ProfilePostResponse> posts = postService.getPostsByAuthor(userId, pageable)
+                .map(DtoMapper::toProfilePostResponse);
+        PagedResponse<ProfilePostResponse> response = PagedResponse.from(posts);
 
         return ResponseEntity.ok(response);
     }

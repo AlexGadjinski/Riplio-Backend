@@ -80,10 +80,16 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post with id [%s] does not exist.".formatted(id)));
     }
 
-    public Page<Post> getPosts(UUID communityId, Pageable pageable) {
+    public Page<Post> getPostsByCommunity(UUID communityId, Pageable pageable) {
         Community community = communityService.getById(communityId);
 
         return postRepository.findByCommunityWithAuthor(community, pageable);
+    }
+
+    public Page<Post> getPostsByAuthor(UUID authorId, Pageable pageable) {
+        User author = userService.getById(authorId);
+
+        return postRepository.findByAuthorWithCommunity(author, pageable);
     }
 
     private Post initializePost(String title, String content, String mediaUrl, PostMediaType mediaType,
