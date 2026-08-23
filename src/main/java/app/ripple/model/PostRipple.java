@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "post_ripples", uniqueConstraints = @UniqueConstraint(columnNames = {"post_id", "author_id"}))
-public class PostRipple {
+public class PostRipple implements Ripple {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -1,6 +1,7 @@
 package app.post.model;
 
 import app.comment.model.Comment;
+import app.common.model.Rippleable;
 import app.community.model.Community;
 import app.ripple.model.PostRipple;
 import app.user.model.User;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "posts")
-public class Post {
+public class Post implements Rippleable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -63,10 +64,12 @@ public class Post {
         commentCount++;
     }
 
+    @Override
     public void incrementRippleScore() {
         rippleScore++;
     }
 
+    @Override
     public void decrementRippleScore() {
         rippleScore--;
     }
