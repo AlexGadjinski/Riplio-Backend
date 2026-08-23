@@ -3,6 +3,7 @@ package app.common.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -88,6 +89,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ForbiddenOperationException.class)
     public ResponseEntity<ErrorResponse> handlerForbiddenOperation(ForbiddenOperationException ex) {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied() {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(), "You do not have permission to perform this action.");
 
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)

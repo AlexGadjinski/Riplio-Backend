@@ -31,6 +31,10 @@ public class User {
     @Basic
     private String avatarUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
+
     @Column(nullable = false)
     private LocalDateTime createdOn;
 

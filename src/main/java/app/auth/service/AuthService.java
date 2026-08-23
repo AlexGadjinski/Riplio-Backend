@@ -6,6 +6,7 @@ import app.common.exception.ResourceConflictException;
 import app.security.jwt.GeneratedToken;
 import app.security.jwt.JwtService;
 import app.user.model.User;
+import app.user.model.UserRole;
 import app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,6 +40,7 @@ public class AuthService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .role(UserRole.USER)
                 .createdOn(now)
                 .updatedOn(now)
                 .build();

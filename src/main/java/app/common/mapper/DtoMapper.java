@@ -14,6 +14,7 @@ import app.post.dto.ProfilePostResponse;
 import app.post.model.Post;
 import app.ripple.model.RippleType;
 import app.security.jwt.GeneratedToken;
+import app.user.dto.AdminUserResponse;
 import app.user.dto.UpdateAvatarResponse;
 import app.user.model.User;
 import lombok.experimental.UtilityClass;
@@ -36,6 +37,17 @@ public class DtoMapper {
 
     public static UpdateAvatarResponse toUpdateAvatarResponse(User user) {
         return new UpdateAvatarResponse(user.getAvatarUrl());
+    }
+
+    public static AdminUserResponse toAdminUserResponse(User user) {
+        return AdminUserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .avatarUrl(user.getAvatarUrl())
+                .role(user.getRole())
+                .createdOn(user.getCreatedOn())
+                .build();
     }
 
     public static CommunityResponse toCommunityResponse(Community community) {

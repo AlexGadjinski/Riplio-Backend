@@ -21,6 +21,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "User with username [%s] does not exist.".formatted(username)));
-        return new UserPrincipal(user.getId(), username, user.getPassword());
+        return new UserPrincipal(user.getId(), username, user.getPassword(), user.getRole());
     }
 }
