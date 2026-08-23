@@ -15,7 +15,9 @@ import app.post.model.Post;
 import app.ripple.model.RippleType;
 import app.security.jwt.GeneratedToken;
 import app.user.dto.AdminUserResponse;
+import app.user.dto.PublicUserProfileResponse;
 import app.user.dto.UpdateAvatarResponse;
+import app.user.dto.UserProfileResponse;
 import app.user.model.User;
 import lombok.experimental.UtilityClass;
 
@@ -32,6 +34,25 @@ public class DtoMapper {
         return LoginResponse.builder()
                 .accessToken(generatedToken.getToken())
                 .expiresAt(generatedToken.getExpiresAt())
+                .build();
+    }
+
+    public static UserProfileResponse toUserProfileResponse(User user) {
+        return UserProfileResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .avatarUrl(user.getAvatarUrl())
+                .createdOn(user.getCreatedOn())
+                .build();
+    }
+
+    public static PublicUserProfileResponse toPublicUserProfileResponse(User user) {
+        return PublicUserProfileResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .avatarUrl(user.getAvatarUrl())
+                .createdOn(user.getCreatedOn())
                 .build();
     }
 
