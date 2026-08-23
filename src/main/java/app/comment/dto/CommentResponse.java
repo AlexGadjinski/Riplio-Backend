@@ -1,6 +1,7 @@
 package app.comment.dto;
 
 import app.comment.model.CommentStatus;
+import app.ripple.model.RippleType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -19,6 +20,7 @@ public class CommentResponse {
     private UUID parentCommentId;
     private int replyCount;
     private int rippleScore;
+    private RippleType myRipple;
     private CommentStatus status;
     private LocalDateTime createdOn;
 }

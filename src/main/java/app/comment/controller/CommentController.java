@@ -8,6 +8,8 @@ import app.comment.model.Comment;
 import app.comment.service.CommentService;
 import app.common.dto.PagedResponse;
 import app.common.mapper.DtoMapper;
+import app.ripple.model.RippleType;
+import app.ripple.service.RippleService;
 import app.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -29,13 +32,14 @@ import java.util.UUID;
 public class CommentController {
 
     private final CommentService commentService;
+    private final RippleService rippleService;
 
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponse> createComment(@AuthenticationPrincipal UserPrincipal principal,
                                                          @PathVariable UUID postId,
                                                          @Valid @ModelAttribute CreateCommentRequest request) {
         Comment comment = commentService.createComment(postId, principal.getUserId(), request);
-        CommentResponse response = DtoMapper.toCommentResponse(comment);
+        CommentResponse response = DtoMapper.toCommentResponse(comment, null);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -44,14 +48,13 @@ public class CommentController {
 
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<PagedResponse<CommentResponse>> getTopLevelComments(
+            @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID postId,
             @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<CommentResponse> comments = commentService.getTopLevelComments(postId, pageable)
-                .map(DtoMapper::toCommentResponse);
-        PagedResponse<CommentResponse> response = PagedResponse.from(comments);
+        Page<Comment> comments = commentService.getTopLevelComments(postId, pageable);
 
-        return ResponseEntity.ok(response);
+        return toCommentPageResponse(comments, principal.getUserId());
     }
 
     @PutMapping("/comments/{id}")
@@ -59,7 +62,7 @@ public class CommentController {
                                                          @PathVariable UUID id,
                                                          @ModelAttribute UpdateCommentRequest request) {
         Comment comment = commentService.updateComment(id, principal.getUserId(), request);
-        CommentResponse response = DtoMapper.toCommentResponse(comment);
+        CommentResponse response = DtoMapper.toCommentResponse(comment, null);
 
         return ResponseEntity.ok(response);
     }
@@ -77,7 +80,7 @@ public class CommentController {
                                                        @PathVariable(name = "id") UUID parentCommentId,
                                                        @Valid @ModelAttribute CreateCommentRequest request) {
         Comment reply = commentService.createReply(parentCommentId, principal.getUserId(), request);
-        CommentResponse response = DtoMapper.toCommentResponse(reply);
+        CommentResponse response = DtoMapper.toCommentResponse(reply, null);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -86,33 +89,49 @@ public class CommentController {
 
     @GetMapping("/comments/{id}/replies")
     public ResponseEntity<PagedResponse<CommentResponse>> getReplies(
+            @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable(name = "id") UUID commentId,
             @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<CommentResponse> replies = commentService.getReplies(commentId, pageable)
-                .map(DtoMapper::toCommentResponse);
-        PagedResponse<CommentResponse> response = PagedResponse.from(replies);
+        Page<Comment> replies = commentService.getReplies(commentId, pageable);
+
+        return toCommentPageResponse(replies, principal.getUserId());
+    }
+
+    @GetMapping("/comments/{id}/thread")
+    public ResponseEntity<List<CommentResponse>> getCommentThread(@AuthenticationPrincipal UserPrincipal principal,
+                                                                  @PathVariable UUID id) {
+
+        List<Comment> thread = commentService.getCommentThread(id);
+        Map<UUID, RippleType> myRipples = rippleService.getMyCommentRipples(thread, principal.getUserId());
+
+        List<CommentResponse> response = thread.stream()
+                .map(c -> DtoMapper.toCommentResponse(c, myRipples.get(c.getId())))
+                .toList();
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/comments/{id}/thread")
-    public ResponseEntity<List<CommentResponse>> getCommentThread(@PathVariable UUID id) {
-        List<CommentResponse> thread = commentService.getCommentThread(id).stream()
-                .map(DtoMapper::toCommentResponse)
-                .toList();
-
-        return ResponseEntity.ok(thread);
-    }
-
     @GetMapping("/users/{userId}/comments")
     public ResponseEntity<PagedResponse<ProfileCommentResponse>> getCommentsByAuthor(
+            @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID userId,
             @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<ProfileCommentResponse> comments = commentService.getCommentsByAuthor(userId, pageable)
-                .map(DtoMapper::toProfileCommentResponse);
-        PagedResponse<ProfileCommentResponse> response = PagedResponse.from(comments);
+        Page<Comment> comments = commentService.getCommentsByAuthor(userId, pageable);
+        Map<UUID, RippleType> myRipples = rippleService.getMyCommentRipples(comments.getContent(), principal.getUserId());
+
+        Page<ProfileCommentResponse> mapped = comments.map(c -> DtoMapper.toProfileCommentResponse(c, myRipples.get(c.getId())));
+        PagedResponse<ProfileCommentResponse> response = PagedResponse.from(mapped);
+
+        return ResponseEntity.ok(response);
+    }
+
+    private ResponseEntity<PagedResponse<CommentResponse>> toCommentPageResponse(Page<Comment> comments, UUID viewingUserId) {
+        Map<UUID, RippleType> myRipples = rippleService.getMyCommentRipples(comments.getContent(), viewingUserId);
+
+        Page<CommentResponse> mapped = comments.map(c -> DtoMapper.toCommentResponse(c, myRipples.get(c.getId())));
+        PagedResponse<CommentResponse> response = PagedResponse.from(mapped);
 
         return ResponseEntity.ok(response);
     }

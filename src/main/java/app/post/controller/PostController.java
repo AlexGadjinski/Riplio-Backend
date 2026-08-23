@@ -8,6 +8,8 @@ import app.post.dto.PostSummaryResponse;
 import app.post.dto.ProfilePostResponse;
 import app.post.model.Post;
 import app.post.service.PostService;
+import app.ripple.model.RippleType;
+import app.ripple.service.RippleService;
 import app.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -28,13 +31,14 @@ import java.util.UUID;
 public class PostController {
 
     private final PostService postService;
+    private final RippleService rippleService;
 
     @PostMapping("/communities/{communityId}/posts")
     public ResponseEntity<PostResponse> createPost(@AuthenticationPrincipal UserPrincipal principal,
                                                    @PathVariable UUID communityId,
                                                    @Valid @ModelAttribute CreatePostRequest request) {
         Post post = postService.createPost(communityId, principal.getUserId(), request);
-        PostResponse response = DtoMapper.toPostResponse(post);
+        PostResponse response = DtoMapper.toPostResponse(post, null);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -43,32 +47,41 @@ public class PostController {
 
     @GetMapping("/communities/{communityId}/posts")
     public ResponseEntity<PagedResponse<PostSummaryResponse>> getPostsByCommunity(
+            @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID communityId,
             @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<PostSummaryResponse> posts = postService.getPostsByCommunity(communityId, pageable)
-                .map(DtoMapper::toPostSummaryResponse);
-        PagedResponse<PostSummaryResponse> response = PagedResponse.from(posts);
+        Page<Post> posts = postService.getPostsByCommunity(communityId, pageable);
+        Map<UUID, RippleType> myRipples = rippleService.getMyPostRipples(posts.getContent(), principal.getUserId());
+
+        Page<PostSummaryResponse> mapped = posts.map(p -> DtoMapper.toPostSummaryResponse(p, myRipples.get(p.getId())));
+        PagedResponse<PostSummaryResponse> response = PagedResponse.from(mapped);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/users/{userId}/posts")
     public ResponseEntity<PagedResponse<ProfilePostResponse>> getPostsByAuthor(
+            @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID userId,
             @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<ProfilePostResponse> posts = postService.getPostsByAuthor(userId, pageable)
-                .map(DtoMapper::toProfilePostResponse);
-        PagedResponse<ProfilePostResponse> response = PagedResponse.from(posts);
+        Page<Post> posts = postService.getPostsByAuthor(userId, pageable);
+        Map<UUID, RippleType> myRipples = rippleService.getMyPostRipples(posts.getContent(), principal.getUserId());
+
+        Page<ProfilePostResponse> mapped = posts.map(p -> DtoMapper.toProfilePostResponse(p, myRipples.get(p.getId())));
+        PagedResponse<ProfilePostResponse> response = PagedResponse.from(mapped);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/posts/{id}")
-    public ResponseEntity<PostResponse> getPostById(@PathVariable UUID id) {
+    public ResponseEntity<PostResponse> getPostById(@AuthenticationPrincipal UserPrincipal principal,
+                                                    @PathVariable UUID id) {
         Post post = postService.getById(id);
-        PostResponse response = DtoMapper.toPostResponse(post);
+        RippleType myRipple = rippleService.getMyPostRipple(post, principal.getUserId());
+
+        PostResponse response = DtoMapper.toPostResponse(post, myRipple);
 
         return ResponseEntity.ok(response);
     }

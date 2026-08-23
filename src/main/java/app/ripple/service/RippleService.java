@@ -23,10 +23,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -90,12 +93,42 @@ public class RippleService {
                 .build();
     }
 
+    public RippleType getMyPostRipple(Post post, UUID viewingUserId) {
+        User viewingUser = userService.getById(viewingUserId);
+
+        return postRippleRepository.findByPostAndAuthor(post, viewingUser)
+                .map(Ripple::getType)
+                .orElse(null);
+    }
+
+    public Map<UUID, RippleType> getMyPostRipples(List<Post> posts, UUID viewingUserId) {
+        User viewingUser = userService.getById(viewingUserId);
+
+        return postRippleRepository.findByPostInAndAuthor(posts, viewingUser).stream()
+                .collect(Collectors.toMap(r -> r.getPost().getId(), Ripple::getType));
+    }
+
+    public RippleType getMyCommentRipple(Comment comment, UUID viewingUserId) {
+        User viewingUser = userService.getById(viewingUserId);
+
+        return commentRippleRepository.findByCommentAndAuthor(comment, viewingUser)
+                .map(Ripple::getType)
+                .orElse(null);
+    }
+
+    public Map<UUID, RippleType> getMyCommentRipples(List<Comment> comments, UUID viewingUserId) {
+        User viewingUser = userService.getById(viewingUserId);
+
+        return commentRippleRepository.findByCommentInAndAuthor(comments, viewingUser).stream()
+                .collect(Collectors.toMap(r -> r.getComment().getId(), Ripple::getType));
+    }
+
     private <R extends Ripple> RippleType applyRipple(Optional<R> optionalRipple,
-                                                RippleType requestedType,
-                                                Rippleable target,
-                                                Supplier<R> newRippleSupplier,
-                                                Consumer<R> saveRipple,
-                                                Consumer<R> deleteRipple) {
+                                                      RippleType requestedType,
+                                                      Rippleable target,
+                                                      Supplier<R> newRippleSupplier,
+                                                      Consumer<R> saveRipple,
+                                                      Consumer<R> deleteRipple) {
         if (optionalRipple.isEmpty()) {
             saveRipple.accept(newRippleSupplier.get());
             updateRippleScore(target, requestedType == RippleType.RISE ? 1 : -1);

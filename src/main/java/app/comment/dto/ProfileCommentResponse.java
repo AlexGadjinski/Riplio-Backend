@@ -1,5 +1,6 @@
 package app.comment.dto;
 
+import app.ripple.model.RippleType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -20,5 +21,6 @@ public class ProfileCommentResponse {
     private String imageUrl;
     private int replyCount;
     private int rippleScore;
+    private RippleType myRipple;
     private LocalDateTime createdOn;
 }

@@ -12,6 +12,7 @@ import app.post.dto.PostResponse;
 import app.post.dto.PostSummaryResponse;
 import app.post.dto.ProfilePostResponse;
 import app.post.model.Post;
+import app.ripple.model.RippleType;
 import app.security.jwt.GeneratedToken;
 import app.user.dto.UpdateAvatarResponse;
 import app.user.model.User;
@@ -116,7 +117,7 @@ public class DtoMapper {
                 .build();
     }
 
-    public static PostResponse toPostResponse(Post post) {
+    public static PostResponse toPostResponse(Post post, RippleType myRipple) {
         Community community = post.getCommunity();
 
         return PostResponse.builder()
@@ -131,11 +132,12 @@ public class DtoMapper {
                 .authorUsername(post.getAuthor().getUsername())
                 .commentCount(post.getCommentCount())
                 .rippleScore(post.getRippleScore())
+                .myRipple(myRipple)
                 .createdOn(post.getCreatedOn())
                 .build();
     }
 
-    public static PostSummaryResponse toPostSummaryResponse(Post post) {
+    public static PostSummaryResponse toPostSummaryResponse(Post post, RippleType myRipple) {
         return PostSummaryResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -146,11 +148,12 @@ public class DtoMapper {
                 .authorAvatarUrl(post.getAuthor().getAvatarUrl())
                 .commentCount(post.getCommentCount())
                 .rippleScore(post.getRippleScore())
+                .myRipple(myRipple)
                 .createdOn(post.getCreatedOn())
                 .build();
     }
 
-    public static ProfilePostResponse toProfilePostResponse(Post post) {
+    public static ProfilePostResponse toProfilePostResponse(Post post, RippleType myRipple) {
         Community community = post.getCommunity();
 
         return ProfilePostResponse.builder()
@@ -164,11 +167,12 @@ public class DtoMapper {
                 .communityAvatarUrl(community.getAvatarUrl())
                 .commentCount(post.getCommentCount())
                 .rippleScore(post.getRippleScore())
+                .myRipple(myRipple)
                 .createdOn(post.getCreatedOn())
                 .build();
     }
 
-    public static CommentResponse toCommentResponse(Comment comment) {
+    public static CommentResponse toCommentResponse(Comment comment, RippleType myRipple) {
         boolean showAuthor = comment.isActive() || comment.isRemoved();
 
         String authorUsername = showAuthor ? comment.getAuthor().getUsername() : DELETED_AUTHOR_PLACEHOLDER;
@@ -188,12 +192,13 @@ public class DtoMapper {
                 .parentCommentId(parentCommentId)
                 .replyCount(comment.getReplyCount())
                 .rippleScore(comment.getRippleScore())
+                .myRipple(myRipple)
                 .status(comment.getStatus())
                 .createdOn(comment.getCreatedOn())
                 .build();
     }
 
-    public static ProfileCommentResponse toProfileCommentResponse(Comment comment) {
+    public static ProfileCommentResponse toProfileCommentResponse(Comment comment, RippleType myRipple) {
         Post post = comment.getPost();
         Community community = post.getCommunity();
 
@@ -207,6 +212,7 @@ public class DtoMapper {
                 .content(comment.getContent())
                 .imageUrl(comment.getImageUrl())
                 .replyCount(comment.getReplyCount())
+                .myRipple(myRipple)
                 .rippleScore(comment.getRippleScore())
                 .createdOn(comment.getCreatedOn())
                 .build();
