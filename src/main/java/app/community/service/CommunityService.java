@@ -16,6 +16,7 @@ import app.community.repository.CommunityBanRepository;
 import app.community.repository.CommunityMembershipRepository;
 import app.community.repository.CommunityRepository;
 import app.user.model.User;
+import app.user.model.UserRole;
 import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -146,6 +147,7 @@ public class CommunityService {
 
     public CommunityMembership updateMember(UUID communityId, UUID actingUserId, UUID targetUserId, CommunityRole newRole) {
         Community community = getById(communityId);
+        User actingUser = userService.getById(actingUserId);
         User targetUser = userService.getById(targetUserId);
 
         requireNotOwner(community, targetUserId, "The community owner's role cannot be changed. Transfer ownership first.");
@@ -157,9 +159,8 @@ public class CommunityService {
 
         boolean isPromotion = newRole == CommunityRole.MODERATOR;
         if (isPromotion) {
-            User actingUser = userService.getById(actingUserId);
             requireModerator(community, actingUser, "Only the owner or moderators can promote members.");
-        } else if (isNotOwner(community, actingUserId)) {
+        } else if (isNotOwner(community, actingUserId) && isNotAdmin(actingUser)) {
             throw new ForbiddenOperationException("Only the owner can demote moderators.");
         }
 
@@ -180,11 +181,13 @@ public class CommunityService {
         boolean isSelfRemoval = actingUserId.equals(targetUserId);
 
         if (!isSelfRemoval) {
-            if (isNotOwner(community, actingUserId) && targetMembership.getRole() == CommunityRole.MODERATOR) {
+            User actingUser = userService.getById(actingUserId);
+
+            if (isNotOwner(community, actingUserId) && targetMembership.getRole() == CommunityRole.MODERATOR
+                    && isNotAdmin(actingUser)) {
                 throw new ForbiddenOperationException("Only the owner can kick a moderator.");
             }
 
-            User actingUser = userService.getById(actingUserId);
             requireModerator(community, actingUser, "Only the owner or moderators can kick members.");
         }
 
@@ -204,12 +207,12 @@ public class CommunityService {
         }
 
         CommunityMembership targetMembership = requireMembership(community, targetUser);
+        User actingUser = userService.getById(actingUserId);
 
-        if (isNotOwner(community, actingUserId) && targetMembership.getRole() == CommunityRole.MODERATOR) {
+        if (isNotOwner(community, actingUserId) && targetMembership.getRole() == CommunityRole.MODERATOR && isNotAdmin(actingUser)) {
             throw new ForbiddenOperationException("Only the owner can ban a moderator.");
         }
 
-        User actingUser = userService.getById(actingUserId);
         requireModerator(community, actingUser, "Only the owner or moderators can ban members.");
 
         membershipRepository.delete(targetMembership);
@@ -232,13 +235,13 @@ public class CommunityService {
     }
 
     private void requireOwner(Community community, UUID userId, String message) {
-        if (isNotOwner(community, userId)) {
+        if (isNotOwner(community, userId) && isNotAdmin(userService.getById(userId))) {
             throw new ForbiddenOperationException(message);
         }
     }
 
     public void requireModerator(Community community, User user, String message) {
-        if (isNotModerator(community, user)) {
+        if (isNotModerator(community, user) && isNotAdmin(user)) {
             throw new ForbiddenOperationException(message);
         }
     }
@@ -265,6 +268,10 @@ public class CommunityService {
 
     public boolean isNotMember(Community community, User user) {
         return !membershipRepository.existsByMemberAndCommunity(user, community);
+    }
+
+    private boolean isNotAdmin(User user) {
+        return user.getRole() != UserRole.ADMIN;
     }
 
     private Community initializeCommunity(String name, String description, User owner) {
