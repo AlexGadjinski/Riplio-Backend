@@ -91,7 +91,7 @@ public class DtoMapper {
 
     public static UpdateMemberResponse toUpdateMemberResponse(CommunityMembership membership) {
         return UpdateMemberResponse.builder()
-                .memberId(membership.getMember().getId())
+                .userId(membership.getMember().getId())
                 .username(membership.getMember().getUsername())
                 .role(membership.getRole())
                 .build();
@@ -108,6 +108,7 @@ public class DtoMapper {
     public static BannedMemberResponse toBannedMemberResponse(CommunityBan communityBan) {
         return BannedMemberResponse.builder()
                 .communityId(communityBan.getCommunity().getId())
+                .bannedUserId(communityBan.getBannedMember().getId())
                 .bannedUsername(communityBan.getBannedMember().getUsername())
                 .bannedAvatarUrl(communityBan.getBannedMember().getAvatarUrl())
                 .bannedByUsername(communityBan.getBannedBy().getUsername())
@@ -121,7 +122,7 @@ public class DtoMapper {
         User member = membership.getMember();
 
         return CommunityMemberResponse.builder()
-                .memberId(member.getId())
+                .userId(member.getId())
                 .username(member.getUsername())
                 .avatarUrl(member.getAvatarUrl())
                 .role(membership.getRole())

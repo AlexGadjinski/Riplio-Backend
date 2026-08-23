@@ -11,7 +11,7 @@ import java.util.UUID;
 @Getter
 public class CommunityMemberResponse {
 
-    private UUID memberId;
+    private UUID userId;
     private String username;
     private String avatarUrl;
     private CommunityRole role;

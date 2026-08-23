@@ -11,6 +11,7 @@ import java.util.UUID;
 public class BannedMemberResponse {
 
     private UUID communityId;
+    private UUID bannedUserId;
     private String bannedUsername;
     private String bannedAvatarUrl;
     private String bannedByUsername;

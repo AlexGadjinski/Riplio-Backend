@@ -10,7 +10,7 @@ import java.util.UUID;
 @Getter
 public class UpdateMemberResponse {
 
-    private UUID memberId;
+    private UUID userId;
     private String username;
     private CommunityRole role;
 }
