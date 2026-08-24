@@ -172,7 +172,7 @@ public class ReportService {
             if (report.getTargetType() == TargetType.POST) {
                 postService.deletePost(report.getTargetId(), actingUserId);
             } else {
-                commentService.deleteComment(report.getTargetId(), actingUserId);
+                commentService.removeReportedComment(report.getTargetId(), actingUserId);
             }
         } catch (BusinessRuleException | ResourceNotFoundException e) {
             log.warn("Reported {} with id [{}] was already unavailable during removal: {}",

@@ -77,10 +77,7 @@ public class CommentService {
         if (!isAuthor(comment, actingUserId)) {
             throw new ForbiddenOperationException("Only the author can edit this comment.");
         }
-
-        if (!comment.isActive()) {
-            throw new BusinessRuleException("Only active comments can be edited.");
-        }
+        requireActive(comment, "Only active comments can be edited.");
 
         String imageUrl = resolveImageUrl(request.getFile(), comment.getImageUrl(), request.isRemoveFile());
         requireContentOrFile(request.getContent(), imageUrl);
@@ -116,10 +113,7 @@ public class CommentService {
     @Transactional
     public void deleteComment(UUID commentId, UUID actingUserId) {
         Comment comment = getById(commentId);
-
-        if (!comment.isActive()) {
-            throw new BusinessRuleException("Only active comments can be deleted.");
-        }
+        requireActive(comment, "Only active comments can be deleted.");
 
         if (isAuthor(comment, actingUserId)) {
             comment.setStatus(CommentStatus.DELETED);
@@ -130,6 +124,19 @@ public class CommentService {
             comment.setStatus(CommentStatus.REMOVED);
         }
 
+        comment.setUpdatedOn(LocalDateTime.now());
+        commentRepository.save(comment);
+    }
+
+    @Transactional
+    public void removeReportedComment(UUID commentId, UUID moderatorId) {
+        Comment comment = getById(commentId);
+        requireActive(comment, "Only active comments can be deleted.");
+
+        User moderator = userService.getById(moderatorId);
+        communityService.requireModerator(comment.getPost().getCommunity(), moderator,
+                "Only moderators can remove this comment.");
+        comment.setStatus(CommentStatus.REMOVED);
         comment.setUpdatedOn(LocalDateTime.now());
         commentRepository.save(comment);
     }
@@ -177,6 +184,12 @@ public class CommentService {
 
     private boolean isAuthor(Comment comment, UUID userId) {
         return comment.getAuthor().getId().equals(userId);
+    }
+
+    private void requireActive(Comment comment, String message) {
+        if (!comment.isActive()) {
+            throw new BusinessRuleException(message);
+        }
     }
 
     private Comment initializeComment(String content, String imageUrl, Post post, User author, Comment parentComment) {
