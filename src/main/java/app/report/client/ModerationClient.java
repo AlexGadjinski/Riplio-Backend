@@ -3,6 +3,7 @@ package app.report.client;
 import app.report.client.dto.CreateReportRequest;
 import app.report.client.dto.ReportResponse;
 import app.report.client.dto.UpdateReportRequest;
+import app.report.model.ReportStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,5 +25,6 @@ public interface ModerationClient {
     ReportResponse updateReport(@PathVariable UUID id, @RequestBody UpdateReportRequest request);
 
     @GetExchange
-    List<ReportResponse> getReportsByCommunity(@RequestParam UUID communityId, @RequestParam(required = false) String status);
+    List<ReportResponse> getReportsByCommunity(@RequestParam UUID communityId,
+                                               @RequestParam(required = false) ReportStatus status);
 }
