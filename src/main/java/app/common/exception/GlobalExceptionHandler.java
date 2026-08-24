@@ -128,4 +128,13 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 
+    @ExceptionHandler(ModerationServiceException.class)
+    public ResponseEntity<ErrorResponse> handleModerationService(ModerationServiceException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.SERVICE_UNAVAILABLE.value(), ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(errorResponse);
+    }
+
 }

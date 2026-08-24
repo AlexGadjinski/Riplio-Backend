@@ -48,10 +48,10 @@ public class RippleService {
         User actingUser = userService.getById(actingUserId);
 
         if (post.getAuthor().getId().equals(actingUserId)) {
-            throw new ForbiddenOperationException("You cannot ripple your own post.");
+            throw new BusinessRuleException("You cannot ripple your own post.");
         }
         if (communityService.isNotMember(post.getCommunity(), actingUser)) {
-            throw new BusinessRuleException("You must be a member of this community to ripple this post.");
+            throw new ForbiddenOperationException("You must be a member of this community to ripple this post.");
         }
 
         Optional<PostRipple> optionalRipple = postRippleRepository.findByPostAndAuthor(post, actingUser);
@@ -75,10 +75,10 @@ public class RippleService {
             throw new BusinessRuleException("You can only ripple active comments.");
         }
         if (comment.getAuthor().getId().equals(actingUserId)) {
-            throw new ForbiddenOperationException("You cannot ripple your own comment.");
+            throw new BusinessRuleException("You cannot ripple your own comment.");
         }
         if (communityService.isNotMember(comment.getPost().getCommunity(), actingUser)) {
-            throw new BusinessRuleException("You must be a member of this community to ripple this comment.");
+            throw new ForbiddenOperationException("You must be a member of this community to ripple this comment.");
         }
 
         Optional<CommentRipple> optionalRipple = commentRippleRepository.findByCommentAndAuthor(comment, actingUser);
