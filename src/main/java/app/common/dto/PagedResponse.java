@@ -2,12 +2,14 @@ package app.common.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 @Builder
 @Getter
+@Jacksonized
 public class PagedResponse<T> {
 
     private List<T> content;
