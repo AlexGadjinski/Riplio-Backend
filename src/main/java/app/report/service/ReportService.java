@@ -14,7 +14,7 @@ import app.post.service.PostService;
 import app.report.client.ModerationClient;
 import app.report.client.dto.CreateReportRequest;
 import app.report.client.dto.ReportResponse;
-import app.report.dto.ReportRequest;
+import app.report.dto.SubmitReportRequest;
 import app.report.model.EnrichedReport;
 import app.report.model.ReportStatus;
 import app.report.model.TargetType;
@@ -43,7 +43,7 @@ public class ReportService {
     private final PostService postService;
     private final CommentService commentService;
 
-    public void reportPost(UUID postId, UUID reporterId, ReportRequest request) {
+    public void reportPost(UUID postId, UUID reporterId, SubmitReportRequest request) {
         Post post = postService.getById(postId);
         User reporter = userService.getById(reporterId);
 
@@ -68,7 +68,7 @@ public class ReportService {
     }
 
     @Transactional
-    public void reportComment(UUID commentId, UUID reporterId, ReportRequest request) {
+    public void reportComment(UUID commentId, UUID reporterId, SubmitReportRequest request) {
         Comment comment = commentService.getById(commentId);
         Community community = comment.getPost().getCommunity();
         User reporter = userService.getById(reporterId);

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
-public class ReportRequest {
+public class SubmitReportRequest {
 
     @NotNull(message = "Reason is required")
     private ReportReason reason;

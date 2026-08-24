@@ -3,7 +3,7 @@ package app.report.controller;
 import app.common.dto.PagedResponse;
 import app.common.mapper.DtoMapper;
 import app.report.dto.EnrichedReportResponse;
-import app.report.dto.ReportRequest;
+import app.report.dto.SubmitReportRequest;
 import app.report.model.ReportStatus;
 import app.report.service.ReportService;
 import app.security.UserPrincipal;
@@ -29,7 +29,7 @@ public class ReportController {
     @PostMapping("/posts/{postId}/reports")
     public ResponseEntity<Void> reportPost(@AuthenticationPrincipal UserPrincipal principal,
                                            @PathVariable UUID postId,
-                                           @Valid @RequestBody ReportRequest request) {
+                                           @Valid @RequestBody SubmitReportRequest request) {
         reportService.reportPost(postId, principal.getUserId(), request);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -38,7 +38,7 @@ public class ReportController {
     @PostMapping("/comments/{commentId}/reports")
     public ResponseEntity<Void> reportComment(@AuthenticationPrincipal UserPrincipal principal,
                                               @PathVariable UUID commentId,
-                                              @Valid @RequestBody ReportRequest request) {
+                                              @Valid @RequestBody SubmitReportRequest request) {
         reportService.reportComment(commentId, principal.getUserId(), request);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
