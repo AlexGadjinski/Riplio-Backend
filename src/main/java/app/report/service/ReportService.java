@@ -2,25 +2,34 @@ package app.report.service;
 
 import app.comment.model.Comment;
 import app.comment.service.CommentService;
+import app.common.dto.PagedResponse;
 import app.common.exception.BusinessRuleException;
 import app.common.exception.ForbiddenOperationException;
 import app.common.exception.ModerationServiceException;
+import app.common.exception.ResourceNotFoundException;
 import app.community.model.Community;
 import app.community.service.CommunityService;
 import app.post.model.Post;
 import app.post.service.PostService;
 import app.report.client.ModerationClient;
 import app.report.client.dto.CreateReportRequest;
+import app.report.client.dto.ReportResponse;
 import app.report.dto.ReportRequest;
+import app.report.model.EnrichedReport;
+import app.report.model.ReportStatus;
 import app.report.model.TargetType;
 import app.user.model.User;
 import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -82,6 +91,66 @@ public class ReportService {
                 .build();
 
         submitReport(clientRequest, commentId, reporterId);
+    }
+
+    public Page<EnrichedReport> getReportsByCommunity(UUID communityId, UUID actingUserId,
+                                                      ReportStatus status, Pageable pageable) {
+        Community community = communityService.getById(communityId);
+        User actingUser = userService.getById(actingUserId);
+
+        communityService.requireModerator(community, actingUser, "Only the owner or moderators can view reports.");
+
+        PagedResponse<ReportResponse> page = fetchReports(communityId, status, pageable);
+        List<EnrichedReport> enrichedReports = page.getContent().stream()
+                .map(this::buildEnrichedReport)
+                .toList();
+
+
+        log.info("{} reports fetched from moderation service for community [{}] by user [{}].",
+                enrichedReports.size(), communityId, actingUserId);
+        return new PageImpl<>(enrichedReports, pageable, page.getTotalElements());
+    }
+
+    private EnrichedReport buildEnrichedReport(ReportResponse report) {
+        User reporter = userService.getById(report.getReporterId());
+        User resolvedBy = report.getResolvedById() != null
+                ? userService.getById(report.getResolvedById())
+                : null;
+
+        EnrichedReport.EnrichedReportBuilder builder = EnrichedReport.builder()
+                .id(report.getId())
+                .targetType(report.getTargetType())
+                .reason(report.getReason())
+                .details(report.getDetails())
+                .status(report.getStatus())
+                .createdOn(report.getCreatedOn())
+                .resolvedOn(report.getResolvedOn())
+                .reporter(reporter)
+                .resolvedBy(resolvedBy);
+
+        if (report.getTargetType() == TargetType.POST) {
+            try {
+                Post post = postService.getById(report.getTargetId());
+                builder.post(post).contentAvailable(true);
+            } catch (ResourceNotFoundException e) {
+                builder.contentAvailable(false);
+            }
+        } else {
+            Comment comment = commentService.getById(report.getTargetId());
+            builder.comment(comment).contentAvailable(true);
+        }
+
+        return builder.build();
+    }
+
+    private PagedResponse<ReportResponse> fetchReports(UUID communityId, ReportStatus status, Pageable pageable) {
+        try {
+            return moderationClient.getReportsByCommunity(
+                    communityId, status, pageable.getPageNumber(), pageable.getPageSize());
+        } catch (RestClientException e) {
+            log.error("Failed to fetch reports from moderation service for community with id [{}].", communityId, e);
+            throw new ModerationServiceException("Unable to load reports. Please try again later!");
+        }
     }
 
     private void submitReport(CreateReportRequest clientRequest, UUID targetId, UUID reporterId) {

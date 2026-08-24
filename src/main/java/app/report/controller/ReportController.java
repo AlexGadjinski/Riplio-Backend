@@ -1,10 +1,17 @@
 package app.report.controller;
 
+import app.common.dto.PagedResponse;
+import app.common.mapper.DtoMapper;
+import app.report.dto.EnrichedReportResponse;
 import app.report.dto.ReportRequest;
+import app.report.model.ReportStatus;
 import app.report.service.ReportService;
 import app.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,5 +42,19 @@ public class ReportController {
         reportService.reportComment(commentId, principal.getUserId(), request);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/communities/{communityId}/reports")
+    public ResponseEntity<PagedResponse<EnrichedReportResponse>> getReportsByCommunity(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable UUID communityId,
+            @RequestParam(required = false) ReportStatus status,
+            @PageableDefault(size = 20) Pageable pageable) {
+
+        Page<EnrichedReportResponse> enrichedReports = reportService.getReportsByCommunity(communityId, principal.getUserId(), status, pageable)
+                .map(DtoMapper::toEnrichedReportResponse);
+        PagedResponse<EnrichedReportResponse> response = PagedResponse.from(enrichedReports);
+
+        return ResponseEntity.ok(response);
     }
 }

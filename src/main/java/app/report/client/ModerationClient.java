@@ -1,5 +1,6 @@
 package app.report.client;
 
+import app.common.dto.PagedResponse;
 import app.report.client.dto.CreateReportRequest;
 import app.report.client.dto.ReportResponse;
 import app.report.client.dto.UpdateReportRequest;
@@ -12,7 +13,6 @@ import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.service.annotation.PutExchange;
 
-import java.util.List;
 import java.util.UUID;
 
 @HttpExchange("/api/v1/reports")
@@ -25,6 +25,8 @@ public interface ModerationClient {
     ReportResponse updateReport(@PathVariable UUID id, @RequestBody UpdateReportRequest request);
 
     @GetExchange
-    List<ReportResponse> getReportsByCommunity(@RequestParam UUID communityId,
-                                               @RequestParam(required = false) ReportStatus status);
+    PagedResponse<ReportResponse> getReportsByCommunity(@RequestParam UUID communityId,
+                                                        @RequestParam(required = false) ReportStatus status,
+                                                        @RequestParam int page,
+                                                        @RequestParam int size);
 }

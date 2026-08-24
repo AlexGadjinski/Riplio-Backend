@@ -12,6 +12,9 @@ import app.post.dto.PostResponse;
 import app.post.dto.PostSummaryResponse;
 import app.post.dto.ProfilePostResponse;
 import app.post.model.Post;
+import app.report.dto.EnrichedReportResponse;
+import app.report.model.EnrichedReport;
+import app.report.model.TargetType;
 import app.ripple.model.RippleType;
 import app.security.jwt.GeneratedToken;
 import app.user.dto.AdminUserResponse;
@@ -250,6 +253,38 @@ public class DtoMapper {
                 .rippleScore(comment.getRippleScore())
                 .createdOn(comment.getCreatedOn())
                 .build();
+    }
+
+    public static EnrichedReportResponse toEnrichedReportResponse(EnrichedReport report) {
+        User reporter = report.getReporter();
+
+        EnrichedReportResponse.EnrichedReportResponseBuilder builder = EnrichedReportResponse.builder()
+                .id(report.getId())
+                .targetType(report.getTargetType())
+                .reason(report.getReason())
+                .details(report.getDetails())
+                .status(report.getStatus())
+                .createdOn(report.getCreatedOn())
+                .resolvedOn(report.getResolvedOn())
+                .reporterId(reporter.getId())
+                .reporterUsername(reporter.getUsername())
+                .reporterAvatarUrl(reporter.getAvatarUrl())
+                .contentAvailable(report.isContentAvailable());
+
+        User resolvedBy = report.getResolvedBy();
+        if (resolvedBy != null) {
+            builder.resolvedById(resolvedBy.getId())
+                    .resolvedByUsername(resolvedBy.getUsername())
+                    .resolvedByAvatarUrl(resolvedBy.getAvatarUrl());
+        }
+
+        if (report.getTargetType() == TargetType.POST && report.getPost() != null) {
+            builder.post(toPostSummaryResponse(report.getPost(), null));
+        } else {
+            builder.comment(toCommentResponse(report.getComment(), null));
+        }
+
+        return builder.build();
     }
 
 }
