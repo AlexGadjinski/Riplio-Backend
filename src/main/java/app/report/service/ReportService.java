@@ -128,16 +128,17 @@ public class ReportService {
                 .reporter(reporter)
                 .resolvedBy(resolvedBy);
 
-        if (report.getTargetType() == TargetType.POST) {
-            try {
+        try {
+            if (report.getTargetType() == TargetType.POST) {
                 Post post = postService.getById(report.getTargetId());
-                builder.post(post).contentAvailable(true);
-            } catch (ResourceNotFoundException e) {
-                builder.contentAvailable(false);
+                builder.post(post);
+            } else {
+                Comment comment = commentService.getById(report.getTargetId());
+                builder.comment(comment);
             }
-        } else {
-            Comment comment = commentService.getById(report.getTargetId());
-            builder.comment(comment).contentAvailable(true);
+            builder.contentAvailable(true);
+        } catch (ResourceNotFoundException e) {
+            builder.contentAvailable(false);
         }
 
         return builder.build();

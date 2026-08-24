@@ -280,7 +280,7 @@ public class DtoMapper {
 
         if (report.getTargetType() == TargetType.POST && report.getPost() != null) {
             builder.post(toPostSummaryResponse(report.getPost(), null));
-        } else {
+        } else if (report.getComment() != null) {
             builder.comment(toCommentResponse(report.getComment(), null));
         }
 
