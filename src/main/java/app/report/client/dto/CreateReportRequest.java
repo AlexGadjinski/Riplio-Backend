@@ -1,7 +1,7 @@
-package app.moderation.client.dto;
+package app.report.client.dto;
 
-import app.moderation.model.ReportReason;
-import app.moderation.model.TargetType;
+import app.report.model.ReportReason;
+import app.report.model.TargetType;
 import lombok.Builder;
 import lombok.Getter;
 

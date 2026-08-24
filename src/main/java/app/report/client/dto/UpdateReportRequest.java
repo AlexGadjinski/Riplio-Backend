@@ -1,6 +1,6 @@
-package app.moderation.client.dto;
+package app.report.client.dto;
 
-import app.moderation.model.ReportStatus;
+import app.report.model.ReportStatus;
 import lombok.Builder;
 import lombok.Getter;
 

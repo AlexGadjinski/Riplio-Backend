@@ -1,7 +1,7 @@
 package app.config;
 
 import app.config.properties.ModerationClientProperties;
-import app.moderation.client.ModerationClient;
+import app.report.client.ModerationClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;

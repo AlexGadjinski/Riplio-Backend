@@ -1,8 +1,8 @@
-package app.moderation.client;
+package app.report.client;
 
-import app.moderation.client.dto.CreateReportRequest;
-import app.moderation.client.dto.ReportResponse;
-import app.moderation.client.dto.UpdateReportRequest;
+import app.report.client.dto.CreateReportRequest;
+import app.report.client.dto.ReportResponse;
+import app.report.client.dto.UpdateReportRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
