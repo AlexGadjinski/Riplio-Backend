@@ -1,5 +1,7 @@
 package app.moderation.client.dto;
 
+import app.moderation.model.ReportReason;
+import app.moderation.model.TargetType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,10 +11,10 @@ import java.util.UUID;
 @Getter
 public class CreateReportRequest {
 
-    private String targetType;
+    private TargetType targetType;
     private UUID targetId;
     private UUID communityId;
     private UUID reporterId;
-    private String reason;
+    private ReportReason reason;
     private String details;
 }

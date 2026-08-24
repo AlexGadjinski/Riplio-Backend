@@ -1,5 +1,6 @@
 package app.moderation.client.dto;
 
+import app.moderation.model.ReportStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,6 +10,6 @@ import java.util.UUID;
 @Getter
 public class UpdateReportRequest {
 
-    private String status;
+    private ReportStatus status;
     private UUID resolvedById;
 }

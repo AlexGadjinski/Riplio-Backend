@@ -1,5 +1,8 @@
 package app.moderation.client.dto;
 
+import app.moderation.model.ReportReason;
+import app.moderation.model.ReportStatus;
+import app.moderation.model.TargetType;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -9,13 +12,13 @@ import java.util.UUID;
 public class ReportResponse {
 
     private UUID id;
-    private String targetType;
+    private TargetType targetType;
     private UUID targetId;
     private UUID communityId;
     private UUID reporterId;
-    private String reason;
+    private ReportReason reason;
     private String details;
-    private String status;
+    private ReportStatus status;
     private UUID resolvedById;
     private LocalDateTime createdOn;
     private LocalDateTime resolvedOn;
