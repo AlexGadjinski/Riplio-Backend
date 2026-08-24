@@ -18,7 +18,7 @@ import java.util.UUID;
 public interface ModerationClient {
 
     @PostExchange
-    ReportResponse createReport(@RequestBody CreateReportRequest request);
+    void createReport(@RequestBody CreateReportRequest request);
 
     @PutExchange("/{id}")
     ReportResponse updateReport(@PathVariable UUID id, @RequestBody UpdateReportRequest request);
