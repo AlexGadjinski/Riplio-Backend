@@ -14,6 +14,8 @@ import app.post.service.PostService;
 import app.report.client.ModerationClient;
 import app.report.client.dto.CreateReportRequest;
 import app.report.client.dto.ReportResponse;
+import app.report.client.dto.UpdateReportRequest;
+import app.report.dto.ResolveReportRequest;
 import app.report.dto.SubmitReportRequest;
 import app.report.model.EnrichedReport;
 import app.report.model.ReportStatus;
@@ -27,6 +29,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import java.util.List;
@@ -93,6 +96,26 @@ public class ReportService {
         submitReport(clientRequest, commentId, reporterId);
     }
 
+    public void resolveReport(UUID reportId, UUID communityId, UUID actingUserId, ResolveReportRequest request) {
+        Community community = communityService.getById(communityId);
+        User actingUser = userService.getById(actingUserId);
+
+        communityService.requireModerator(community, actingUser, "Only the owner or moderators can resolve reports.");
+
+        ReportStatus resolution = request.getStatus();
+        if (resolution != ReportStatus.DISMISSED && resolution != ReportStatus.CONTENT_REMOVED) {
+            throw new BusinessRuleException("A report can only be resolved as DISMISSED or CONTENT_REMOVED.");
+        }
+
+        ReportResponse response = updateReportStatus(reportId, resolution, actingUserId);
+
+        if (resolution == ReportStatus.CONTENT_REMOVED) {
+            removeReportedContent(response, actingUserId);
+        }
+
+        log.info("User with id [{}] resolved report with id [{}] as [{}].", actingUserId, reportId, resolution);
+    }
+
     public Page<EnrichedReport> getReportsByCommunity(UUID communityId, UUID actingUserId,
                                                       ReportStatus status, Pageable pageable) {
         Community community = communityService.getById(communityId);
@@ -142,6 +165,38 @@ public class ReportService {
         }
 
         return builder.build();
+    }
+
+    private void removeReportedContent(ReportResponse report, UUID actingUserId) {
+        try {
+            if (report.getTargetType() == TargetType.POST) {
+                postService.deletePost(report.getTargetId(), actingUserId);
+            } else {
+                commentService.deleteComment(report.getTargetId(), actingUserId);
+            }
+        } catch (BusinessRuleException | ResourceNotFoundException e) {
+            log.warn("Reported {} with id [{}] was already unavailable during removal: {}",
+                    report.getTargetType().name().toLowerCase(), report.getTargetId(), e.getMessage());
+        }
+    }
+
+    private ReportResponse updateReportStatus(UUID reportId, ReportStatus status, UUID resolvedById) {
+        UpdateReportRequest request = UpdateReportRequest.builder()
+                .status(status)
+                .resolvedById(resolvedById)
+                .build();
+
+        try {
+            return moderationClient.updateReport(reportId, request);
+        } catch (HttpClientErrorException e) {
+            log.warn("Moderation service rejected report resolution for id [{}] with status [{}].",
+                    reportId, e.getStatusCode());
+            throw new BusinessRuleException("This report cannot be resolved. It may not exist or has already been resolved.");
+        } catch (RestClientException e) {
+            log.error("Failed to reach moderation service while resolving report with id [{}] and status [{}].",
+                    reportId, status, e);
+            throw new ModerationServiceException("Unable to resolve report. Please try again later!");
+        }
     }
 
     private PagedResponse<ReportResponse> fetchReports(UUID communityId, ReportStatus status, Pageable pageable) {

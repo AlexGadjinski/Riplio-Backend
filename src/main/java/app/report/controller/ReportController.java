@@ -3,6 +3,7 @@ package app.report.controller;
 import app.common.dto.PagedResponse;
 import app.common.mapper.DtoMapper;
 import app.report.dto.EnrichedReportResponse;
+import app.report.dto.ResolveReportRequest;
 import app.report.dto.SubmitReportRequest;
 import app.report.model.ReportStatus;
 import app.report.service.ReportService;
@@ -42,6 +43,16 @@ public class ReportController {
         reportService.reportComment(commentId, principal.getUserId(), request);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PutMapping("/communities/{communityId}/reports/{id}")
+    public ResponseEntity<Void> resolveReport(@AuthenticationPrincipal UserPrincipal principal,
+                                              @PathVariable UUID communityId,
+                                              @PathVariable UUID id,
+                                              @Valid @RequestBody ResolveReportRequest request) {
+        reportService.resolveReport(id, communityId, principal.getUserId(), request);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/communities/{communityId}/reports")
