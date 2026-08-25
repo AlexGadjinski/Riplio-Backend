@@ -2,7 +2,7 @@
 
 Riplio is a Reddit-inspired community platform where users create communities, share posts, comment in nested threads, and send "ripples" (up/down votes) across content. It includes full community moderation and a dedicated content-moderation microservice.
 
-> **Main repository:** <MAIN_REPO_URL>
+> **Main repository:** https://github.com/AlexGadjinski/Riplio-Backend
 
 This repository contains the **main backend service** (REST API). The project is split across three repositories — see [Related repositories](#related-repositories).
 
@@ -40,7 +40,7 @@ riplio-backend (this repo, :8080)  <----->  riplio-moderations-service (:8081)
      MySQL: riplio_app                        MySQL: riplio_moderations_service
 ```
 
-The main backend owns users, communities, posts, comments and ripples. The moderation microservice owns reports and moderation decisions; the main backend integrates with it over HTTP and exposes the report endpoints to clients.
+The main backend owns users, communities, posts, comments and ripples. The moderation microservice owns reports and moderation decisions; the main backend integrates with it over HTTP (secured by a shared internal API key) and exposes the report endpoints to clients.
 
 ## Getting started
 
@@ -51,39 +51,53 @@ The main backend owns users, communities, posts, comments and ripples. The moder
 - MySQL 8+
 - A Cloudinary account (for media uploads)
 
-### Configuration
+### Environment variables
 
-Create a local `application.yml` (or set environment variables) with your own values:
+The application reads its secrets and credentials from environment variables. **Do not commit real values** — set them in your local environment (or an untracked `.env` file). All of the following must be configured before running:
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/riplio_app
-    username: your_db_user
-    password: your_db_password
-  jpa:
-    hibernate:
-      ddl-auto: update
+| Variable | Description |
+|----------|-------------|
+| `DB_USERNAME` | MySQL username (e.g. `root`) |
+| `DB_PASSWORD` | MySQL password |
+| `JWT_SECRET` | Base64-encoded secret used to sign and verify JWT access tokens |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
+| `INTERNAL_API_KEY` | Shared key used to authenticate requests between the backend and the moderation microservice (must match the value configured in the microservice) |
 
-app:
-  jwt:
-    secret: your_jwt_secret
-    expiration: 86400000
+Example (do not use these values in production — replace with your own):
 
-cloudinary:
-  cloud-name: your_cloud_name
-  api-key: your_api_key
-  api-secret: your_api_secret
-
-moderation-service:
-  base-url: http://localhost:8081
+```bash
+export DB_USERNAME=root
+export DB_PASSWORD=your_db_password
+export JWT_SECRET=your_base64_jwt_secret
+export CLOUDINARY_CLOUD_NAME=your_cloud_name
+export CLOUDINARY_API_KEY=your_api_key
+export CLOUDINARY_API_SECRET=your_api_secret
+export INTERNAL_API_KEY=your_internal_api_key
 ```
+
+On Windows PowerShell:
+
+```powershell
+$env:DB_USERNAME="root"
+$env:DB_PASSWORD="your_db_password"
+$env:JWT_SECRET="your_base64_jwt_secret"
+$env:CLOUDINARY_CLOUD_NAME="your_cloud_name"
+$env:CLOUDINARY_API_KEY="your_api_key"
+$env:CLOUDINARY_API_SECRET="your_api_secret"
+$env:INTERNAL_API_KEY="your_internal_api_key"
+```
+
+### Database
 
 Create the database before first run:
 
 ```sql
 CREATE DATABASE riplio_app;
 ```
+
+Schema is managed by JPA/Hibernate on startup.
 
 ### Run
 
