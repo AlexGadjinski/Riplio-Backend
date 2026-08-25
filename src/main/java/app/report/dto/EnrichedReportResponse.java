@@ -1,7 +1,7 @@
 package app.report.dto;
 
 import app.comment.dto.CommentResponse;
-import app.post.dto.PostSummaryResponse;
+import app.post.dto.CommunityPostResponse;
 import app.report.model.ReportReason;
 import app.report.model.ReportStatus;
 import app.report.model.TargetType;
@@ -31,7 +31,7 @@ public class EnrichedReportResponse {
     private String resolvedByUsername;
     private String resolvedByAvatarUrl;
 
-    private PostSummaryResponse post;
+    private CommunityPostResponse post;
     private CommentResponse comment;
 
     private boolean contentAvailable;

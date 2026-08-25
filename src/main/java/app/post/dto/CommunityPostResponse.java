@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Builder
 @Getter
-public class PostSummaryResponse {
+public class CommunityPostResponse {
 
     private UUID id;
     private String title;

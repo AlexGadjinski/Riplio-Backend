@@ -2,9 +2,9 @@ package app.post.controller;
 
 import app.common.dto.PagedResponse;
 import app.common.mapper.DtoMapper;
+import app.post.dto.CommunityPostResponse;
 import app.post.dto.CreatePostRequest;
 import app.post.dto.PostResponse;
-import app.post.dto.PostSummaryResponse;
 import app.post.dto.ProfilePostResponse;
 import app.post.model.Post;
 import app.post.service.PostService;
@@ -46,7 +46,7 @@ public class PostController {
     }
 
     @GetMapping("/communities/{communityId}/posts")
-    public ResponseEntity<PagedResponse<PostSummaryResponse>> getPostsByCommunity(
+    public ResponseEntity<PagedResponse<CommunityPostResponse>> getPostsByCommunity(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID communityId,
             @PageableDefault(size = 20, sort = "createdOn", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -54,8 +54,8 @@ public class PostController {
         Page<Post> posts = postService.getPostsByCommunity(communityId, pageable);
         Map<UUID, RippleType> myRipples = rippleService.getMyPostRipples(posts.getContent(), principal.getUserId());
 
-        Page<PostSummaryResponse> mapped = posts.map(p -> DtoMapper.toPostSummaryResponse(p, myRipples.get(p.getId())));
-        PagedResponse<PostSummaryResponse> response = PagedResponse.from(mapped);
+        Page<CommunityPostResponse> mapped = posts.map(p -> DtoMapper.toCommunityPostResponse(p, myRipples.get(p.getId())));
+        PagedResponse<CommunityPostResponse> response = PagedResponse.from(mapped);
 
         return ResponseEntity.ok(response);
     }

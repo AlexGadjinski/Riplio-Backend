@@ -9,7 +9,7 @@ import app.community.model.Community;
 import app.community.model.CommunityBan;
 import app.community.model.CommunityMembership;
 import app.post.dto.PostResponse;
-import app.post.dto.PostSummaryResponse;
+import app.post.dto.CommunityPostResponse;
 import app.post.dto.ProfilePostResponse;
 import app.post.model.Post;
 import app.report.dto.EnrichedReportResponse;
@@ -174,8 +174,8 @@ public class DtoMapper {
                 .build();
     }
 
-    public static PostSummaryResponse toPostSummaryResponse(Post post, RippleType myRipple) {
-        return PostSummaryResponse.builder()
+    public static CommunityPostResponse toCommunityPostResponse(Post post, RippleType myRipple) {
+        return CommunityPostResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
@@ -279,7 +279,7 @@ public class DtoMapper {
         }
 
         if (report.getTargetType() == TargetType.POST && report.getPost() != null) {
-            builder.post(toPostSummaryResponse(report.getPost(), null));
+            builder.post(toCommunityPostResponse(report.getPost(), null));
         } else if (report.getComment() != null) {
             builder.comment(toCommentResponse(report.getComment(), null));
         }
