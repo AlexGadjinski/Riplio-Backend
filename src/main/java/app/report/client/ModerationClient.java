@@ -18,6 +18,9 @@ import java.util.UUID;
 @HttpExchange("/api/v1/reports")
 public interface ModerationClient {
 
+    @GetExchange("/health")
+    void checkHealth();
+
     @PostExchange
     void createReport(@RequestBody CreateReportRequest request);
 

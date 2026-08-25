@@ -11,6 +11,7 @@ import app.community.model.CommunityMembership;
 import app.post.dto.PostResponse;
 import app.post.dto.CommunityPostResponse;
 import app.post.dto.ProfilePostResponse;
+import app.post.dto.TrendingPostResponse;
 import app.post.model.Post;
 import app.report.dto.EnrichedReportResponse;
 import app.report.model.EnrichedReport;
@@ -205,6 +206,24 @@ public class DtoMapper {
                 .commentCount(post.getCommentCount())
                 .rippleScore(post.getRippleScore())
                 .myRipple(myRipple)
+                .createdOn(post.getCreatedOn())
+                .build();
+    }
+
+    public static TrendingPostResponse toTrendingPostResponse(Post post) {
+        Community community = post.getCommunity();
+
+        return TrendingPostResponse.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .mediaUrl(post.getMediaUrl())
+                .mediaType(post.getMediaType())
+                .communityId(community.getId())
+                .communityName(community.getName())
+                .communityAvatarUrl(community.getAvatarUrl())
+                .commentCount(post.getCommentCount())
+                .rippleScore(post.getRippleScore())
                 .createdOn(post.getCreatedOn())
                 .build();
     }

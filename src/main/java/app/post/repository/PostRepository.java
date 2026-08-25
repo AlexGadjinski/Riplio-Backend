@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,4 +33,10 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
             WHERE p.author = :author
             """)
     Page<Post> findByAuthorWithCommunity(User author, Pageable pageable);
+
+    @Query("""
+            SELECT p FROM Post p JOIN FETCH p.community
+            ORDER BY p.rippleScore DESC
+            """)
+    List<Post> findTrending(Pageable pageable);
 }

@@ -7,6 +7,7 @@ import app.common.storage.CloudinaryService;
 import app.common.storage.FileValidator;
 import app.community.model.Community;
 import app.community.service.CommunityService;
+import app.config.CacheConfiguration;
 import app.post.dto.CreatePostRequest;
 import app.post.model.Post;
 import app.post.model.PostMediaType;
@@ -15,17 +16,25 @@ import app.user.model.User;
 import app.user.service.UserService;
 import com.cloudinary.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {
+
+    private static final int TRENDING_LIMIT = 100;
 
     private final PostRepository postRepository;
     private final FileValidator fileValidator;
@@ -89,6 +98,18 @@ public class PostService {
         User author = userService.getById(authorId);
 
         return postRepository.findByAuthorWithCommunity(author, pageable);
+    }
+
+    @Cacheable(CacheConfiguration.TRENDING_POSTS_CACHE)
+    public List<Post> getTrendingPosts() {
+        log.info("Loading top {} trending posts from the database.", TRENDING_LIMIT);
+
+        return postRepository.findTrending(PageRequest.of(0, TRENDING_LIMIT));
+    }
+
+    @CacheEvict(value = CacheConfiguration.TRENDING_POSTS_CACHE, allEntries = true)
+    public void evictTrendingPosts() {
+        log.info("Evicted trending posts cache.");
     }
 
     private Post initializePost(String title, String content, String mediaUrl, PostMediaType mediaType,

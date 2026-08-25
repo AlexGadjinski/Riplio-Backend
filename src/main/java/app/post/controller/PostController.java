@@ -2,10 +2,7 @@ package app.post.controller;
 
 import app.common.dto.PagedResponse;
 import app.common.mapper.DtoMapper;
-import app.post.dto.CommunityPostResponse;
-import app.post.dto.CreatePostRequest;
-import app.post.dto.PostResponse;
-import app.post.dto.ProfilePostResponse;
+import app.post.dto.*;
 import app.post.model.Post;
 import app.post.service.PostService;
 import app.ripple.model.RippleType;
@@ -22,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -71,6 +69,15 @@ public class PostController {
 
         Page<ProfilePostResponse> mapped = posts.map(p -> DtoMapper.toProfilePostResponse(p, myRipples.get(p.getId())));
         PagedResponse<ProfilePostResponse> response = PagedResponse.from(mapped);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/posts/trending")
+    public ResponseEntity<List<TrendingPostResponse>> getTrendingPosts() {
+        List<TrendingPostResponse> response = postService.getTrendingPosts().stream()
+                .map(DtoMapper::toTrendingPostResponse)
+                .toList();
 
         return ResponseEntity.ok(response);
     }
