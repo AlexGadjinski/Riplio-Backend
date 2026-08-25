@@ -19,6 +19,7 @@ import app.ripple.repository.PostRippleRepository;
 import app.user.model.User;
 import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RippleService {
@@ -60,6 +62,9 @@ public class RippleService {
                 postRippleRepository::save,
                 postRippleRepository::delete);
 
+        log.info("User with id [{}] rippled post with id [{}] with ripple type [{}].",
+                actingUserId, postId, resultType);
+
         return RippleResponse.builder()
                 .type(resultType)
                 .score(post.getRippleScore())
@@ -86,6 +91,9 @@ public class RippleService {
                 () -> initializeCommentRipple(comment, actingUser, request.getType()),
                 commentRippleRepository::save,
                 commentRippleRepository::delete);
+
+        log.info("User with id [{}] rippled comment with id [{}] with ripple type [{}].",
+                actingUserId, commentId, resultType);
 
         return RippleResponse.builder()
                 .type(resultType)

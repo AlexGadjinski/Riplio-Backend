@@ -10,6 +10,7 @@ import app.user.model.User;
 import app.user.model.UserRole;
 import app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -41,7 +43,10 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setUpdatedOn(LocalDateTime.now());
 
-        return userRepository.save(user);
+        User updatedUser = userRepository.save(user);
+        log.info("Profile updated for user with id [{}].", updatedUser.getId());
+
+        return updatedUser;
     }
 
     public User updateAvatar(UUID userId, MultipartFile file) {
@@ -52,7 +57,10 @@ public class UserService {
         User user = getById(userId);
         user.setAvatarUrl(avatarUrl);
         user.setUpdatedOn(LocalDateTime.now());
-        return userRepository.save(user);
+        User updatedUser = userRepository.save(user);
+        log.info("Avatar updated for user with id [{}].", updatedUser.getId());
+
+        return updatedUser;
     }
 
     public User promoteToAdmin(UUID userId) {
@@ -64,7 +72,10 @@ public class UserService {
 
         user.setRole(UserRole.ADMIN);
         user.setUpdatedOn(LocalDateTime.now());
-        return userRepository.save(user);
+        User promotedUser = userRepository.save(user);
+
+        log.info("User with id [{}] promoted to admin.", promotedUser.getId());
+        return promotedUser;
     }
 
     public Page<User> getAllUsers(Pageable pageable) {

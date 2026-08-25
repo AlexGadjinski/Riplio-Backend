@@ -19,6 +19,7 @@ import app.user.model.User;
 import app.user.model.UserRole;
 import app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommunityService {
@@ -53,6 +55,7 @@ public class CommunityService {
 
         membershipRepository.save(initializeMembership(owner, community, CommunityRole.MODERATOR));
 
+        log.info("Community with id [{}] created by user with id [{}].", community.getId(), ownerId);
         return community;
     }
 
@@ -69,7 +72,10 @@ public class CommunityService {
         community.setName(newName);
         community.setDescription(request.getDescription());
         community.setUpdatedOn(LocalDateTime.now());
-        return communityRepository.save(community);
+        Community updatedCommunity = communityRepository.save(community);
+
+        log.info("Community with id [{}] info updated by user with id [{}].", updatedCommunity.getId(), userId);
+        return updatedCommunity;
     }
 
     public Community updateAvatar(UUID communityId, UUID userId, MultipartFile file) {
@@ -81,7 +87,10 @@ public class CommunityService {
 
         community.setAvatarUrl(avatarUrl);
         community.setUpdatedOn(LocalDateTime.now());
-        return communityRepository.save(community);
+        Community updatedCommunity = communityRepository.save(community);
+
+        log.info("Avatar updated for community with id [{}] by user with id [{}].", updatedCommunity.getId(), userId);
+        return updatedCommunity;
     }
 
     public Community updateBanner(UUID communityId, UUID userId, MultipartFile file) {
@@ -93,7 +102,10 @@ public class CommunityService {
 
         community.setBannerUrl(bannerUrl);
         community.setUpdatedOn(LocalDateTime.now());
-        return communityRepository.save(community);
+        Community updatedCommunity = communityRepository.save(community);
+
+        log.info("Banner updated for community with id [{}] by user with id [{}].", updatedCommunity.getId(), userId);
+        return updatedCommunity;
     }
 
     public Community transferOwnership(UUID communityId, UUID currentOwnerId, UUID newOwnerId) {
@@ -116,6 +128,9 @@ public class CommunityService {
         community.setUpdatedOn(LocalDateTime.now());
 
         communityRepository.save(community);
+
+        log.info("Ownership of community with id [{}] transferred from user with id [{}] to user with id [{}].",
+                communityId, currentOwnerId, newOwnerId);
         return community;
     }
 
@@ -127,6 +142,8 @@ public class CommunityService {
         banRepository.deleteByCommunity(community);
         membershipRepository.deleteByCommunity(community);
         communityRepository.delete(community);
+
+        log.info("Community with id [{}] deleted by user with id [{}].", communityId, userId);
     }
 
     public CommunityMembership joinCommunity(UUID userId, UUID communityId) {
@@ -142,7 +159,10 @@ public class CommunityService {
             throw new ForbiddenOperationException("You are banned from this community.");
         }
 
-        return membershipRepository.save(initializeMembership(member, community, CommunityRole.MEMBER));
+        CommunityMembership membership = membershipRepository.save(initializeMembership(member, community, CommunityRole.MEMBER));
+
+        log.info("User with id [{}] joined community with id [{}].", userId, communityId);
+        return membership;
     }
 
     public CommunityMembership updateMember(UUID communityId, UUID actingUserId, UUID targetUserId, CommunityRole newRole) {
@@ -168,6 +188,9 @@ public class CommunityService {
         membershipRepository.save(targetMembership);
 
         targetMembership.setMember(targetUser);
+
+        log.info("User with id [{}] role changed to [{}] in community with id [{}] by user with id [{}].",
+                targetUserId, newRole, communityId, actingUserId);
         return targetMembership;
     }
 
@@ -192,6 +215,10 @@ public class CommunityService {
         }
 
         membershipRepository.delete(targetMembership);
+
+
+        log.info("User with id [{}] removed from community with id [{}] by user with id [{}].",
+                targetUserId, communityId, actingUserId);
     }
 
     @Transactional
@@ -217,7 +244,12 @@ public class CommunityService {
 
         membershipRepository.delete(targetMembership);
 
-        return banRepository.save(initializeBan(targetUser, community, actingUser, request));
+        CommunityBan ban = banRepository.save(initializeBan(targetUser, community, actingUser, request));
+
+        log.info("User with id [{}] banned from community with id [{}] by user with id [{}].",
+                targetUserId, communityId, actingUserId);
+
+        return ban;
     }
 
     public void unbanMember(UUID communityId, UUID actingUserId, UUID targetUserId) {
@@ -232,6 +264,9 @@ public class CommunityService {
                         "User with id [%s] is not banned from this community.".formatted(targetUserId)));
 
         banRepository.delete(ban);
+
+        log.info("User with id [{}] unbanned from community with id [{}] by user with id [{}].",
+                targetUserId, communityId, actingUserId);
     }
 
     private void requireOwner(Community community, UUID userId, String message) {

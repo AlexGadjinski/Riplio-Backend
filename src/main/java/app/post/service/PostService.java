@@ -66,8 +66,13 @@ public class PostService {
             mediaType = PostMediaType.fromContentType(contentType);
         }
 
-        return postRepository.save(
+        Post post = postRepository.save(
                 initializePost(request.getTitle(), request.getContent(), mediaUrl, mediaType, community, author));
+
+
+        log.info("Post with id [{}] created by user with id [{}] in community with id [{}].",
+                post.getId(), authorId, communityId);
+        return post;
     }
 
     public void deletePost(UUID postId, UUID actingUserId) {
@@ -81,6 +86,7 @@ public class PostService {
         }
 
         postRepository.delete(post);
+        log.info("Post with id [{}] deleted by user with id [{}].", postId, actingUserId);
     }
 
     public Post getById(UUID id) {

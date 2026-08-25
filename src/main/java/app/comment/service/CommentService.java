@@ -17,6 +17,7 @@ import app.user.model.User;
 import app.user.service.UserService;
 import com.cloudinary.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -43,13 +45,21 @@ public class CommentService {
     @Transactional
     public Comment createComment(UUID postId, UUID authorId, CreateCommentRequest request) {
         Post post = postService.getById(postId);
-        return createComment(post, authorId, null, request);
+        Comment comment = createComment(post, authorId, null, request);
+
+        log.info("Comment with id [{}] created by user with id [{}] on post with id [{}].",
+                comment.getId(), authorId, postId);
+        return comment;
     }
 
     @Transactional
     public Comment createReply(UUID parentCommentId, UUID authorId, CreateCommentRequest request) {
         Comment parentComment = getById(parentCommentId);
-        return createComment(parentComment.getPost(), authorId, parentComment, request);
+        Comment reply = createComment(parentComment.getPost(), authorId, parentComment, request);
+
+        log.info("Reply with id [{}] created by user with id [{}] to comment with id [{}].",
+                reply.getId(), authorId, parentCommentId);
+        return reply;
     }
 
     private Comment createComment(Post post, UUID authorId, Comment parentComment, CreateCommentRequest request) {
@@ -86,8 +96,10 @@ public class CommentService {
         comment.setImageUrl(imageUrl);
         comment.setUpdatedOn(LocalDateTime.now());
 
-        commentRepository.save(comment);
-        return comment;
+        Comment updatedComment = commentRepository.save(comment);
+
+        log.info("Comment with id [{}] updated by user with id [{}].", updatedComment.getId(), actingUserId);
+        return updatedComment;
     }
 
     private String resolveImageUrl(MultipartFile file, String existingUrl, boolean removeFile) {
@@ -126,6 +138,9 @@ public class CommentService {
 
         comment.setUpdatedOn(LocalDateTime.now());
         commentRepository.save(comment);
+
+        log.info("Comment with id [{}] deleted by user with id [{}] with status [{}].",
+                commentId, actingUserId, comment.getStatus());
     }
 
     @Transactional
@@ -139,6 +154,9 @@ public class CommentService {
         comment.setStatus(CommentStatus.REMOVED);
         comment.setUpdatedOn(LocalDateTime.now());
         commentRepository.save(comment);
+
+
+        log.info("Reported comment with id [{}] removed by moderator with id [{}].", commentId, moderatorId);
     }
 
     public Page<Comment> getTopLevelComments(UUID postId, Pageable pageable) {
