@@ -1,7 +1,6 @@
 package app.ripple.model;
 
 import app.comment.model.Comment;
-import app.post.model.Post;
 import app.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
