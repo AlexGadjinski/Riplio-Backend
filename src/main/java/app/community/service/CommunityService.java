@@ -216,7 +216,6 @@ public class CommunityService {
 
         membershipRepository.delete(targetMembership);
 
-
         log.info("User with id [{}] removed from community with id [{}] by user with id [{}].",
                 targetUserId, communityId, actingUserId);
     }
