@@ -26,4 +26,8 @@ public class UserPrincipal implements UserDetails {
         return List.of(authority);
     }
 
+    public static UserPrincipal fromClaims(UUID userId, String username, UserRole role) {
+        return new UserPrincipal(userId, username, null, role);
+    }
+
 }
