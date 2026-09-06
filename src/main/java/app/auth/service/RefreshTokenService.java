@@ -1,6 +1,6 @@
 package app.auth.service;
 
-import app.auth.dto.IssuedRefreshToken;
+import app.auth.model.IssuedRefreshToken;
 import app.auth.model.RefreshToken;
 import app.auth.repository.RefreshTokenRepository;
 import app.common.exception.InvalidRefreshTokenException;

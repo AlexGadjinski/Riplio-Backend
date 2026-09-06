@@ -1,4 +1,4 @@
-package app.auth.dto;
+package app.auth.model;
 
 import lombok.Builder;
 import lombok.Getter;

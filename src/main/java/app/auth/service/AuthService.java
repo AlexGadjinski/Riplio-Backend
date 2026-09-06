@@ -1,6 +1,7 @@
 package app.auth.service;
 
 import app.auth.dto.*;
+import app.auth.model.IssuedRefreshToken;
 import app.common.exception.InvalidRefreshTokenException;
 import app.common.exception.ResourceConflictException;
 import app.security.UserPrincipal;
