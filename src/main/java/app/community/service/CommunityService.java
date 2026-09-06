@@ -139,8 +139,6 @@ public class CommunityService {
         Community community = getById(communityId);
         requireOwner(community, userId, "Only the community owner can delete this community.");
 
-        banRepository.deleteByCommunity(community);
-        membershipRepository.deleteByCommunity(community);
         communityRepository.delete(community);
 
         log.info("Community with id [{}] deleted by user with id [{}].", communityId, userId);

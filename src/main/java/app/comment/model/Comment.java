@@ -2,13 +2,13 @@ package app.comment.model;
 
 import app.common.model.Rippleable;
 import app.post.model.Post;
-import app.ripple.model.CommentRipple;
 import app.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -32,6 +32,7 @@ public class Comment implements Rippleable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,6 +40,7 @@ public class Comment implements Rippleable {
     private User author;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Comment parentComment;
 
     @Enumerated(EnumType.STRING)
@@ -56,9 +58,6 @@ public class Comment implements Rippleable {
 
     @Column(nullable = false)
     private LocalDateTime updatedOn;
-
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
-    private List<CommentRipple> ripples;
 
     public boolean isActive() {
         return status == CommentStatus.ACTIVE;

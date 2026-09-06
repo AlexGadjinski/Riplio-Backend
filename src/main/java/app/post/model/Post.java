@@ -1,15 +1,14 @@
 package app.post.model;
 
-import app.comment.model.Comment;
 import app.common.model.Rippleable;
 import app.community.model.Community;
-import app.ripple.model.PostRipple;
 import app.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -39,6 +38,7 @@ public class Post implements Rippleable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Community community;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -53,12 +53,6 @@ public class Post implements Rippleable {
 
     @Column(nullable = false)
     private LocalDateTime createdOn;
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
-    private List<Comment> comments;
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
-    private List<PostRipple> ripples;
 
     public void incrementCommentCount() {
         commentCount++;
