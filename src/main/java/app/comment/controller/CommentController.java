@@ -68,8 +68,8 @@ public class CommentController {
     }
 
     @DeleteMapping("/comments/{id}")
-    public ResponseEntity<CommentResponse> deleteComment(@AuthenticationPrincipal UserPrincipal principal,
-                                                         @PathVariable UUID id) {
+    public ResponseEntity<Void> deleteComment(@AuthenticationPrincipal UserPrincipal principal,
+                                              @PathVariable UUID id) {
         commentService.deleteComment(id, principal.getUserId());
 
         return ResponseEntity.noContent().build();
