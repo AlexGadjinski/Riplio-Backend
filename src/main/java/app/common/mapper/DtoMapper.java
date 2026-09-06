@@ -1,6 +1,5 @@
 package app.common.mapper;
 
-import app.auth.dto.LoginResponse;
 import app.comment.dto.CommentResponse;
 import app.comment.dto.ProfileCommentResponse;
 import app.comment.model.Comment;
@@ -8,8 +7,8 @@ import app.community.dto.*;
 import app.community.model.Community;
 import app.community.model.CommunityBan;
 import app.community.model.CommunityMembership;
-import app.post.dto.PostResponse;
 import app.post.dto.CommunityPostResponse;
+import app.post.dto.PostResponse;
 import app.post.dto.ProfilePostResponse;
 import app.post.dto.TrendingPostResponse;
 import app.post.model.Post;
@@ -17,7 +16,6 @@ import app.report.dto.EnrichedReportResponse;
 import app.report.model.EnrichedReport;
 import app.report.model.TargetType;
 import app.ripple.model.RippleType;
-import app.security.jwt.GeneratedToken;
 import app.user.dto.AdminUserResponse;
 import app.user.dto.PublicUserProfileResponse;
 import app.user.dto.UpdateAvatarResponse;
@@ -33,13 +31,6 @@ public class DtoMapper {
     private static final String DELETED_AUTHOR_PLACEHOLDER = "[deleted]";
     private static final String DELETED_CONTENT_TEXT = "[this comment self-destructed]";
     private static final String REMOVED_CONTENT_TEXT = "[zapped by a moderator]";
-
-    public static LoginResponse toLoginResponse(GeneratedToken generatedToken) {
-        return LoginResponse.builder()
-                .accessToken(generatedToken.getToken())
-                .expiresAt(generatedToken.getExpiresAt())
-                .build();
-    }
 
     public static UserProfileResponse toUserProfileResponse(User user) {
         return UserProfileResponse.builder()

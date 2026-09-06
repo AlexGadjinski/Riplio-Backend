@@ -1,11 +1,10 @@
 package app.auth.controller;
 
+import app.auth.dto.AuthTokensResponse;
 import app.auth.dto.LoginRequest;
-import app.auth.dto.LoginResponse;
+import app.auth.dto.RefreshTokenRequest;
 import app.auth.dto.RegisterRequest;
 import app.auth.service.AuthService;
-import app.common.mapper.DtoMapper;
-import app.security.jwt.GeneratedToken;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,10 +31,23 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        GeneratedToken generatedToken = authService.login(request);
-        LoginResponse loginResponse = DtoMapper.toLoginResponse(generatedToken);
+    public ResponseEntity<AuthTokensResponse> login(@Valid @RequestBody LoginRequest request) {
+        AuthTokensResponse response = authService.login(request);
 
-        return ResponseEntity.ok(loginResponse);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthTokensResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        AuthTokensResponse response = authService.refresh(request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        authService.logout(request);
+
+        return ResponseEntity.noContent().build();
     }
 }
