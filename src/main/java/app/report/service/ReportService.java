@@ -73,6 +73,10 @@ public class ReportService {
     @Transactional
     public void reportComment(UUID commentId, UUID reporterId, SubmitReportRequest request) {
         Comment comment = commentService.getById(commentId);
+        if (!comment.isActive()) {
+            throw new BusinessRuleException("You can only report active comments.");
+        }
+
         Community community = comment.getPost().getCommunity();
         User reporter = userService.getById(reporterId);
 
