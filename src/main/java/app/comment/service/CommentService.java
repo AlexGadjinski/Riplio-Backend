@@ -25,10 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -178,21 +178,13 @@ public class CommentService {
     }
 
     public List<Comment> getCommentThread(UUID commentId) {
-        List<Comment> thread = new ArrayList<>();
-        Comment comment = getById(commentId);
+        List<Comment> comments = commentRepository.findCommentThread(commentId);
 
-        while (comment != null) {
-            thread.add(comment);
-
-            if (comment.getParentComment() == null) {
-                break;
-            }
-
-            comment = getById(comment.getParentComment().getId());
+        if (comments.isEmpty()) {
+            throw new ResourceNotFoundException("Comment with id [%s] does not exist.".formatted(commentId));
         }
 
-        Collections.reverse(thread);
-        return thread;
+        return comments;
     }
 
     public Comment getById(UUID id) {
