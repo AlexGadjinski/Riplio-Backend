@@ -78,6 +78,7 @@ public class CommentService {
         return commentRepository.save(initializeComment(request.getContent(), imageUrl, post, author, parentComment));
     }
 
+    @Transactional
     public Comment updateComment(UUID commentId, UUID actingUserId, UpdateCommentRequest request) {
         Comment comment = getById(commentId);
 
