@@ -54,10 +54,6 @@ public class Post implements Rippleable {
     @Column(nullable = false)
     private LocalDateTime createdOn;
 
-    public void incrementCommentCount() {
-        commentCount++;
-    }
-
     @Override
     public void incrementRippleScore() {
         rippleScore++;

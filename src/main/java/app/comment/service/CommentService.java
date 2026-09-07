@@ -70,13 +70,12 @@ public class CommentService {
         String imageUrl = resolveImageUrl(request.getFile(), null, false);
         requireContentOrFile(request.getContent(), imageUrl);
 
-        Comment comment = initializeComment(request.getContent(), imageUrl, post, author, parentComment);
-        post.incrementCommentCount();
+        postService.incrementCommentCount(post.getId());
         if (parentComment != null) {
-            parentComment.incrementReplyCount();
+            commentRepository.incrementReplyCount(parentComment.getId());
         }
 
-        return commentRepository.save(comment);
+        return commentRepository.save(initializeComment(request.getContent(), imageUrl, post, author, parentComment));
     }
 
     public Comment updateComment(UUID commentId, UUID actingUserId, UpdateCommentRequest request) {

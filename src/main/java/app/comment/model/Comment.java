@@ -71,10 +71,6 @@ public class Comment implements Rippleable {
         return status == CommentStatus.REMOVED;
     }
 
-    public void incrementReplyCount() {
-        replyCount++;
-    }
-
     @Override
     public void incrementRippleScore() {
         rippleScore++;

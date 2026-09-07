@@ -117,6 +117,10 @@ public class PostService {
         log.info("Evicted trending posts cache.");
     }
 
+    public void incrementCommentCount(UUID postId) {
+        postRepository.incrementCommentCount(postId);
+    }
+
     private Post initializePost(String title, String content, String mediaUrl, PostMediaType mediaType,
                                 Community community, User author) {
         return Post.builder()
