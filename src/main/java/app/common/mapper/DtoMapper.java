@@ -201,7 +201,7 @@ public class DtoMapper {
                 .build();
     }
 
-    public static TrendingPostResponse toTrendingPostResponse(Post post) {
+    public static TrendingPostResponse toTrendingPostResponse(Post post, RippleType myRipple) {
         Community community = post.getCommunity();
 
         return TrendingPostResponse.builder()
@@ -215,6 +215,7 @@ public class DtoMapper {
                 .communityAvatarUrl(community.getAvatarUrl())
                 .commentCount(post.getCommentCount())
                 .rippleScore(post.getRippleScore())
+                .myRipple(myRipple)
                 .createdOn(post.getCreatedOn())
                 .build();
     }

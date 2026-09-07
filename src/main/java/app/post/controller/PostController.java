@@ -74,9 +74,14 @@ public class PostController {
     }
 
     @GetMapping("/posts/trending")
-    public ResponseEntity<List<TrendingPostResponse>> getTrendingPosts() {
-        List<TrendingPostResponse> response = postService.getTrendingPosts().stream()
-                .map(DtoMapper::toTrendingPostResponse)
+    public ResponseEntity<List<TrendingPostResponse>> getTrendingPosts(
+            @AuthenticationPrincipal UserPrincipal principal) {
+
+        List<Post> posts = postService.getTrendingPosts();
+        Map<UUID, RippleType> myRipples = rippleService.getMyPostRipples(posts, principal.getUserId());
+
+        List<TrendingPostResponse> response = posts.stream()
+                .map(p -> DtoMapper.toTrendingPostResponse(p, myRipples.get(p.getId())))
                 .toList();
 
         return ResponseEntity.ok(response);

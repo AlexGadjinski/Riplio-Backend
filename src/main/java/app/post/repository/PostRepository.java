@@ -37,6 +37,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Query("""
             SELECT p FROM Post p JOIN FETCH p.community
             ORDER BY p.rippleScore DESC
+            LIMIT :limit
             """)
-    List<Post> findTrending(Pageable pageable);
+    List<Post> findTrending(int limit);
 }

@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -110,7 +109,7 @@ public class PostService {
     public List<Post> getTrendingPosts() {
         log.info("Loading top {} trending posts from the database.", TRENDING_LIMIT);
 
-        return postRepository.findTrending(PageRequest.of(0, TRENDING_LIMIT));
+        return postRepository.findTrending(TRENDING_LIMIT);
     }
 
     @CacheEvict(value = CacheConfiguration.TRENDING_POSTS_CACHE, allEntries = true)
