@@ -1,6 +1,5 @@
 package app.comment.model;
 
-import app.common.model.Rippleable;
 import app.post.model.Post;
 import app.user.model.User;
 import jakarta.persistence.*;
@@ -18,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "comments")
-public class Comment implements Rippleable {
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -69,15 +68,5 @@ public class Comment implements Rippleable {
 
     public boolean isRemoved() {
         return status == CommentStatus.REMOVED;
-    }
-
-    @Override
-    public void incrementRippleScore() {
-        rippleScore++;
-    }
-
-    @Override
-    public void decrementRippleScore() {
-        rippleScore--;
     }
 }

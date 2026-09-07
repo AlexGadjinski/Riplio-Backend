@@ -4,7 +4,6 @@ import app.comment.model.Comment;
 import app.comment.service.CommentService;
 import app.common.exception.BusinessRuleException;
 import app.common.exception.ForbiddenOperationException;
-import app.common.model.Rippleable;
 import app.community.service.CommunityService;
 import app.post.model.Post;
 import app.post.service.PostService;
@@ -24,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -57,17 +53,24 @@ public class RippleService {
         }
 
         Optional<PostRipple> optionalRipple = postRippleRepository.findByPostAndAuthor(post, actingUser);
-        RippleType resultType = applyRipple(optionalRipple, request.getType(), post,
+
+        Map.Entry<RippleType, Integer> resolution = resolveRipple(optionalRipple, request.getType(),
                 () -> initializePostRipple(post, actingUser, request.getType()),
                 postRippleRepository::save,
                 postRippleRepository::delete);
 
-        log.info("User with id [{}] rippled post with id [{}] with ripple type [{}].",
-                actingUserId, postId, resultType);
+        postService.adjustRippleScore(postId, resolution.getValue());
+
+        if (resolution.getKey() == null) {
+            log.info("User with id [{}] removed their ripple on post with id [{}].", actingUserId, postId);
+        } else {
+            log.info("User with id [{}] rippled post with id [{}] with ripple type [{}].",
+                    actingUserId, postId, resolution.getKey());
+        }
 
         return RippleResponse.builder()
-                .type(resultType)
-                .score(post.getRippleScore())
+                .type(resolution.getKey())
+                .score(post.getRippleScore() + resolution.getValue())
                 .build();
     }
 
@@ -87,17 +90,24 @@ public class RippleService {
         }
 
         Optional<CommentRipple> optionalRipple = commentRippleRepository.findByCommentAndAuthor(comment, actingUser);
-        RippleType resultType = applyRipple(optionalRipple, request.getType(), comment,
+
+        Map.Entry<RippleType, Integer> resolution = resolveRipple(optionalRipple, request.getType(),
                 () -> initializeCommentRipple(comment, actingUser, request.getType()),
                 commentRippleRepository::save,
                 commentRippleRepository::delete);
 
-        log.info("User with id [{}] rippled comment with id [{}] with ripple type [{}].",
-                actingUserId, commentId, resultType);
+        commentService.adjustRippleScore(commentId, resolution.getValue());
+
+        if (resolution.getKey() == null) {
+            log.info("User with id [{}] removed their ripple on comment with id [{}].", actingUserId, commentId);
+        } else {
+            log.info("User with id [{}] rippled comment with id [{}] with ripple type [{}].",
+                    actingUserId, commentId, resolution.getKey());
+        }
 
         return RippleResponse.builder()
-                .type(resultType)
-                .score(comment.getRippleScore())
+                .type(resolution.getKey())
+                .score(comment.getRippleScore() + resolution.getValue())
                 .build();
     }
 
@@ -131,40 +141,28 @@ public class RippleService {
                 .collect(Collectors.toMap(r -> r.getComment().getId(), Ripple::getType));
     }
 
-    private <R extends Ripple> RippleType applyRipple(Optional<R> optionalRipple,
-                                                      RippleType requestedType,
-                                                      Rippleable target,
-                                                      Supplier<R> newRippleSupplier,
-                                                      Consumer<R> saveRipple,
-                                                      Consumer<R> deleteRipple) {
+    private <R extends Ripple> Map.Entry<RippleType, Integer> resolveRipple(Optional<R> optionalRipple,
+                                                                            RippleType requestedType,
+                                                                            Supplier<R> newRippleSupplier,
+                                                                            Consumer<R> saveRipple,
+                                                                            Consumer<R> deleteRipple) {
         if (optionalRipple.isEmpty()) {
             saveRipple.accept(newRippleSupplier.get());
-            updateRippleScore(target, requestedType == RippleType.RISE ? 1 : -1);
-            return requestedType;
+            int scoreChange = requestedType == RippleType.RISE ? 1 : -1;
+            return new AbstractMap.SimpleEntry<>(requestedType, scoreChange);
         }
 
         R ripple = optionalRipple.get();
         if (ripple.getType() == requestedType) {
             deleteRipple.accept(ripple);
-            updateRippleScore(target, requestedType == RippleType.RISE ? -1 : 1);
-            return null;
+            int scoreChange = requestedType == RippleType.RISE ? -1 : 1;
+            return new AbstractMap.SimpleEntry<>(null, scoreChange);
         } else {
             ripple.setType(requestedType);
             ripple.setUpdatedOn(LocalDateTime.now());
             saveRipple.accept(ripple);
-            updateRippleScore(target, requestedType == RippleType.RISE ? 2 : -2);
-            return requestedType;
-        }
-    }
-
-    private void updateRippleScore(Rippleable target, int amount) {
-        int steps = Math.abs(amount);
-        for (int i = 0; i < steps; i++) {
-            if (amount > 0) {
-                target.incrementRippleScore();
-            } else {
-                target.decrementRippleScore();
-            }
+            int scoreChange = requestedType == RippleType.RISE ? 2 : -2;
+            return new AbstractMap.SimpleEntry<>(requestedType, scoreChange);
         }
     }
 

@@ -121,6 +121,10 @@ public class PostService {
         postRepository.incrementCommentCount(postId);
     }
 
+    public void adjustRippleScore(UUID postId, int scoreChange) {
+        postRepository.adjustRippleScore(postId, scoreChange);
+    }
+
     private Post initializePost(String title, String content, String mediaUrl, PostMediaType mediaType,
                                 Community community, User author) {
         return Post.builder()

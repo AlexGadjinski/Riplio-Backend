@@ -199,6 +199,10 @@ public class CommentService {
         }
     }
 
+    public void adjustRippleScore(UUID commentId, int scoreChange) {
+        commentRepository.adjustRippleScore(commentId, scoreChange);
+    }
+
     private Comment initializeComment(String content, String imageUrl, Post post, User author, Comment parentComment) {
         LocalDateTime now = LocalDateTime.now();
 

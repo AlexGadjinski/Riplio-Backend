@@ -65,4 +65,12 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
     @Modifying
     @Transactional
     void incrementReplyCount(UUID commentId);
+
+    @Query("""
+            UPDATE Comment c SET c.rippleScore = c.rippleScore + :scoreChange
+            WHERE c.id = :commentId
+            """)
+    @Modifying
+    @Transactional
+    void adjustRippleScore(UUID commentId, int scoreChange);
 }

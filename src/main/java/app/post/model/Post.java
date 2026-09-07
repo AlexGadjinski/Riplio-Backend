@@ -1,6 +1,5 @@
 package app.post.model;
 
-import app.common.model.Rippleable;
 import app.community.model.Community;
 import app.user.model.User;
 import jakarta.persistence.*;
@@ -18,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "posts")
-public class Post implements Rippleable {
+public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -53,14 +52,4 @@ public class Post implements Rippleable {
 
     @Column(nullable = false)
     private LocalDateTime createdOn;
-
-    @Override
-    public void incrementRippleScore() {
-        rippleScore++;
-    }
-
-    @Override
-    public void decrementRippleScore() {
-        rippleScore--;
-    }
 }
