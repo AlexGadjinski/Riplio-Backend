@@ -3,10 +3,7 @@ package app.report.service;
 import app.comment.model.Comment;
 import app.comment.service.CommentService;
 import app.common.dto.PagedResponse;
-import app.common.exception.BusinessRuleException;
-import app.common.exception.ForbiddenOperationException;
-import app.common.exception.ModerationServiceException;
-import app.common.exception.ResourceNotFoundException;
+import app.common.exception.*;
 import app.community.model.Community;
 import app.community.service.CommunityService;
 import app.post.model.Post;
@@ -193,7 +190,7 @@ public class ReportService {
         try {
             return moderationClient.updateReport(reportId, request);
         } catch (HttpClientErrorException e) {
-            log.warn("Moderation service rejected report resolution for id [{}] with status [{}].",
+            log.warn("Moderation service rejected resolution of report with id [{}] and status [{}].",
                     reportId, e.getStatusCode());
             throw new BusinessRuleException("This report cannot be resolved. It may not exist or has already been resolved.");
         } catch (RestClientException e) {
@@ -218,7 +215,10 @@ public class ReportService {
             moderationClient.createReport(clientRequest);
             log.info("User with id [{}] reported {} with id [{}] for reason [{}].",
                     reporterId, clientRequest.getTargetType().name().toLowerCase(), targetId, clientRequest.getReason());
-
+        } catch (HttpClientErrorException.Conflict e) {
+            log.warn("User with id [{}] attempted to report {} with id [{}] more than once.",
+                    reporterId, clientRequest.getTargetType().name().toLowerCase(), targetId);
+            throw new ResourceConflictException("You have already reported this content.");
         } catch (RestClientException e) {
             log.error("Failed to submit report to moderation service for {} with id [{}].",
                     clientRequest.getTargetType().name(), targetId, e);
