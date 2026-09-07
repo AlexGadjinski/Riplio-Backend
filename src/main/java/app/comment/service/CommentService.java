@@ -93,10 +93,10 @@ public class CommentService {
         comment.setImageUrl(imageUrl);
         comment.setUpdatedOn(LocalDateTime.now());
 
-        Comment updatedComment = commentRepository.save(comment);
+        commentRepository.save(comment);
 
-        log.info("Comment with id [{}] updated by user with id [{}].", updatedComment.getId(), actingUserId);
-        return updatedComment;
+        log.info("Comment with id [{}] updated by user with id [{}].", comment.getId(), actingUserId);
+        return comment;
     }
 
     private String resolveImageUrl(MultipartFile file, String existingUrl, boolean removeFile) {
